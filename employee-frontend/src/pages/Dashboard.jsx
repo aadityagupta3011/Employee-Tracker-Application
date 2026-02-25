@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios.js";
+import Navbar from "../components/Navbar.jsx";
 
 export default function Dashboard(){
   const [stats, setStats] = useState([]);
@@ -10,7 +11,9 @@ export default function Dashboard(){
 
   return(
     <div>
-      <h1>Employee Dashboard</h1>
+            <Navbar />
+      
+      <h1 className="text-3xl">Employee Dashboard</h1>
       <pre>{JSON.stringify(stats, null, 2)}</pre>
     </div>
   );

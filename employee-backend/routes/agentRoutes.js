@@ -8,48 +8,67 @@ const Incident = require("../models/Incident");
 const router = express.Router();
 
 
+const sanitizeAppUsage = (usage) => {
+  const cleaned = {};
+
+  for (let key in usage) {
+    const safeKey = key.replace(/\./g, "_");
+    cleaned[safeKey] = usage[key];
+  }
+
+  return cleaned;
+};
+
 router.post(
   "/activity",
   authMiddleware(["EMPLOYEE"]),
   async (req, res) => {
-    const { active, idle, passive, fakeMouse, appUsage } = req.body;
+    try {
+      const { active, idle, passive, fakeMouse, appUsage } = req.body;
 
-    const user = await User.findById(req.user.id);
-    const today = new Date().toISOString().slice(0, 10);
+      const user = await User.findById(req.user.id);
+      const today = new Date().toISOString().slice(0, 10);
 
-    const update = {
-      $inc: {
-        activeSeconds: active,
-        idleSeconds: idle,
-        passiveSeconds: passive
-      },
-      $set: {
-        email: user.email,
-        lastUpdated: new Date()
-      },
-      $setOnInsert: {
-        employeeId: user.employeeId,
-        date: today
+      const update = {
+        $inc: {
+          activeSeconds: active,
+          idleSeconds: idle,
+          passiveSeconds: passive
+        },
+        $set: {
+          email: user.email,
+          lastUpdated: new Date()
+        },
+        $setOnInsert: {
+          employeeId: user.employeeId,
+          date: today
+        }
+      };
+
+      if (fakeMouse) {
+        update.$set.fakeMouseDetected = true;
       }
-    };
 
-    if (fakeMouse) {
-      update.$set.fakeMouseDetected = true;
+      if (appUsage) {
+        update.$set.appUsage = sanitizeAppUsage(appUsage);
+      }
+
+      await ActivityLog.findOneAndUpdate(
+        { employeeId: user.employeeId, date: today },
+        update,
+        { upsert: true, new: true }
+      );
+
+      res.json({ message: "Activity updated" });
+
+    } catch (err) {
+      console.error("❌ Activity error:", err);
+      res.status(500).json({ message: "Server error" });
     }
-
-    if (appUsage) {
-      update.$set.appUsage = appUsage;
-    }
-
-    await ActivityLog.findOneAndUpdate(
-      { employeeId: user.employeeId, date: today },
-      update,
-      { upsert: true, new: true }
-    );
-
-    res.json({ message: "Activity updated" });
   }
 );
+
+
 // =======================
 // INCIDENT (SUSPECT IMAGE)
 // =======================
