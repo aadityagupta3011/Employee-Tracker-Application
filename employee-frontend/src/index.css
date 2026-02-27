@@ -1,1 +1,4 @@
 @import "tailwindcss";
+.section-title {
+  @apply text-xl font-bold mb-3 text-gray-800;
+}

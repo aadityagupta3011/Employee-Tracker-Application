@@ -88,14 +88,19 @@ export default function AdminEmployees() {
           />
 
         </div>
+{/* SORT BUTTONS */}
+<div className="flex flex-wrap items-center gap-3 mb-4">
 
-        {/* SORT BUTTONS */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <SortButton type="focus" label="Focus %" />
-          <SortButton type="active" label="Active Time" />
-          <SortButton type="idle" label="Idle Time" />
-          <SortButton type="name" label="A–Z" />
-        </div>
+  <span className="font-semibold text-gray-700 whitespace-nowrap">
+    Sort:
+  </span>
+
+  <SortButton type="focus" label="Focus %" />
+  <SortButton type="active" label="Active Time" />
+  <SortButton type="idle" label="Idle Time" />
+  <SortButton type="name" label="A–Z" />
+
+</div>
 
         {/* DESKTOP TABLE */}
         <div className="hidden md:block bg-white rounded-2xl shadow-sm border">

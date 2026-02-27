@@ -36,18 +36,15 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
-      
       <div className="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-md">
-        
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
           Welcome Back 👋
         </h2>
         <p className="text-center text-gray-500 mb-8">
-          Login to your admin panel
+          Login to your (Admin/Employee) panel
         </p>
 
         <div className="space-y-5">
-          
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Email
@@ -76,8 +73,7 @@ export default function Login() {
 
           <button
             onClick={handleLogin}
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition duration-200 font-semibold shadow-md"
-          >
+            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition duration-200 font-semibold shadow-md">
             Sign In
           </button>
         </div>
@@ -85,35 +81,42 @@ export default function Login() {
         <p className="text-center text-sm text-gray-400 mt-6">
           © 2026 Employee Tracker
         </p>
-        
+
         <div className="flex flex-col md:flex-row gap-4 mt-4 text-sm">
-  
-  {/* Admin Card */}
-  <div className="bg-gray-50 border rounded-xl p-4 shadow-sm w-full">
-    <h3 className="font-semibold text-gray-700 mb-2">Admin Credentials</h3>
+          {/* Admin Card */}
+          <div className="bg-gray-50 border rounded-xl p-4 shadow-sm w-full">
+            <h3 className="font-semibold text-gray-700 mb-2">
+              Admin Credentials
+            </h3>
 
-    <p className="text-gray-600">
-      <span className="font-medium">Email:</span> admin@test.com
-    </p>
-    <p className="text-gray-600">
-      <span className="font-medium">Password:</span> admin123
-    </p>
-  </div>
+            <p className="text-gray-600">
+              <span className="font-medium">Email:</span> admin@test.com
+            </p>
+            <p className="text-gray-600">
+              <span className="font-medium">Password:</span> admin123
+            </p>
+          </div>
 
-  {/* Employee Card */}
-  <div className="bg-gray-50 border rounded-xl p-4 shadow-sm w-full">
-    <h3 className="font-semibold text-gray-700 mb-2">Employee Credentials</h3>
+          {/* Employee Card */}
+          <div className="bg-gray-50 border rounded-xl p-4 shadow-sm w-full">
+            <h3 className="font-semibold text-gray-700 mb-2">
+              Employee Credentials
+            </h3>
 
-    <p className="text-gray-600">
-      <span className="font-medium">Email:</span> aaditya@company.com
-    </p>
-    <p className="text-gray-600">
-      <span className="font-medium">Password:</span> emp123
-    </p>
-  </div>
-
-</div>
-
+            <p className="text-gray-600">
+              <span className="font-medium  ">Email:</span>{" "}
+              <div className="bg-sky-200 rounded-xs p-1 " >
+                
+              <span>
+                aaditya@company.com ekta@company.com virat@company.com prakesh@company.com
+              </span>
+              </div>
+            </p>
+            <p className="text-gray-600">
+              <span className="font-medium">Password:</span> emp123
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -7,6 +7,11 @@ import AdminHome from "./pages/AdminHome";
 import AdminEmployees from "./pages/AdminEmployees";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminProfile from "./pages/AdminProfile";
+import AdminIncidents from "./pages/adminIncident.jsx";
+import EmployeeNavbar from "./components/EmployeeNavbar.jsx";
+import EmployeeDashboard from "./pages/employeeDashboard.jsx";
+import EmployeeProfile from "./pages/EmployeeProfile.jsx";
+import EmployeeIncidents from "./pages/EmployeeIncidents.jsx";
 
 function App() {
   return (
@@ -49,6 +54,45 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/indident"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <AdminIncidents />
+            </ProtectedRoute>
+          }
+        />
+<Route
+  path="/employee-dashboard"
+  element={
+    <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+      <>
+        <EmployeeDashboard />
+      </>
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/employee-profile"
+  element={
+    <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+      <> 
+        <EmployeeProfile />
+      </>
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/employee-incidents"
+  element={
+    <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+      <> 
+        <EmployeeIncidents />
+      </>
+    </ProtectedRoute>
+  }
+/>
       </Routes>
     </Router>
   );

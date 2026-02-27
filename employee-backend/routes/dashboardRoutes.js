@@ -66,7 +66,6 @@ router.get(
 
       const log = await ActivityLog.findOne({
         employeeId: user.employeeId,
-        date: today
       });
 
       if (!log) {
@@ -162,38 +161,7 @@ router.get(
     }
   }
 );
-
-
-// router.get(
-//   "/admin/employee/:employeeId",
-//   authMiddleware(["ADMIN"]),
-//   async (req, res) => {
-//     try {
-//       const logs = await ActivityLog.find({
-//         employeeId: req.params.employeeId
-//       });
-
-//       let combinedUsage = {};
-
-//       logs.forEach(log => {
-//         if (log.appUsage) {
-//           Object.entries(log.appUsage).forEach(([app, seconds]) => {
-//             combinedUsage[app] =
-//               (combinedUsage[app] || 0) + seconds;
-//           });
-//         }
-//       });
-
-//       res.json({ appUsage: combinedUsage });
-
-//     } catch (err) {
-//       console.error(err);
-//       res.status(500).json({ message: "Server error" });
-//     }
-//   }
-// );
-
-
+ 
 
 /* ============================
    ADMIN INCIDENTS LIST

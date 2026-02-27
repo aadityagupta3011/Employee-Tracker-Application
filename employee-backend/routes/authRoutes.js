@@ -5,11 +5,10 @@ const User = require("../models/User");
 
 const router = express.Router();
 
-
 const authMiddleware = require("../middleware/authMiddleware");
 const Employee = require("../models/Employee");
 
-/* ADMIN / EMPLOYEE LOGIN */
+/* ================= LOGIN ================= */
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -28,10 +27,21 @@ router.post("/login", async (req, res) => {
   res.json({ token, role: user.role, employeeId: user.employeeId });
 });
 
-module.exports = router;
+/* ================= GET LOGGED IN USER ================= */
+router.get(
+  "/me",
+  authMiddleware(["ADMIN", "EMPLOYEE"]),
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id).select("-password");
+      res.json(user);
+    } catch (err) {
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
 
-
-// ADMIN creates employee
+/* ================= ADMIN CREATES EMPLOYEE ================= */
 router.post(
   "/register-employee",
   authMiddleware(["ADMIN"]),
@@ -69,3 +79,5 @@ router.post(
     });
   }
 );
+
+module.exports = router;
