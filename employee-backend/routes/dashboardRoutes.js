@@ -68,7 +68,7 @@ router.get(
         employeeId: user.employeeId,
       });
 
-      if (!log) {
+      if (!log) { 
         return res.json(null);
       } 
 

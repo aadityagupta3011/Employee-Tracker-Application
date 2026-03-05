@@ -16,6 +16,12 @@ export default function AdminDashboard() {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
 
+  const [empName, setEmpName] = useState("");
+const [empEmail, setEmpEmail] = useState("");
+const [empPassword, setEmpPassword] = useState("");
+const [empDept, setEmpDept] = useState("");
+const [creating, setCreating] = useState(false);
+
   /* ================= FETCH EMPLOYEES ================= */
   useEffect(() => {
     api
@@ -44,7 +50,7 @@ export default function AdminDashboard() {
   const topFive = sortedByFocus.slice(0, 5);
   const lowFive = [...sortedByFocus].reverse().slice(0, 5);
 
-  /* ================= SEND MAIL ================= */
+  /* ================= f ================= */
   const sendMail = async () => {
     await api.post("/admin/send-mail", {
       to: selected.map((e) => e.email),
@@ -58,6 +64,39 @@ export default function AdminDashboard() {
     setSubject("");
     setMessage("");
   };
+
+  const handleCreateEmployee = async () => {
+  if (!empName || !empEmail || !empPassword || !empDept) {
+    return alert("All fields required");
+  }
+
+  try {
+    setCreating(true);
+
+    await api.post("/auth/register-employee", {
+      name: empName,
+      email: empEmail,
+      password: empPassword,
+      department: empDept,
+    });
+
+    alert("Employee created ✅");
+
+    setEmpName("");
+    setEmpEmail("");
+    setEmpPassword("");
+    setEmpDept("");
+
+    // refresh leaderboard + dropdown
+    const res = await api.get("/dashboard/admin");
+    setEmployees(res.data);
+
+  } catch (err) {
+    alert(err.response?.data?.message || "Creation failed ❌");
+  } finally {
+    setCreating(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -88,7 +127,7 @@ export default function AdminDashboard() {
                 type="low"
               />
             </div>
-
+<div className="space-y-8">
             {/* RIGHT SIDE — QUICK MAIL */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border relative">
               <h3 className="text-lg font-bold mb-4">✉️ Quick Mail</h3>
@@ -194,7 +233,51 @@ export default function AdminDashboard() {
                 Send Mail
               </button>
             </div>
-          </div>
+            {/* ================= CREATE EMPLOYEE ================= */}
+<div className="bg-white p-6 rounded-2xl shadow-sm border">
+  <h3 className="text-lg font-bold mb-4">➕ Create Employee</h3>
+
+  <input
+    placeholder="Full Name"
+    value={empName}
+    onChange={(e) => setEmpName(e.target.value)}
+    className="w-full border rounded-lg p-2 mb-3"
+  />
+
+  <input
+    placeholder="Email"
+    value={empEmail}
+    onChange={(e) => setEmpEmail(e.target.value)}
+    className="w-full border rounded-lg p-2 mb-3"
+  />
+
+  <input
+    type="password"
+    placeholder="Password"
+    value={empPassword}
+    onChange={(e) => setEmpPassword(e.target.value)}
+    className="w-full border rounded-lg p-2 mb-3"
+  />
+
+  <input
+    placeholder="Department"
+    value={empDept}
+    onChange={(e) => setEmpDept(e.target.value)}
+    className="w-full border rounded-lg p-2 mb-4"
+  />
+
+  <button
+    onClick={handleCreateEmployee}
+    disabled={creating}
+    className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+  >
+    {creating ? "Creating..." : "Create Employee"}
+  </button>
+</div>
+
+</div>
+            </div>
+            
         )}
       </div>
     </div>

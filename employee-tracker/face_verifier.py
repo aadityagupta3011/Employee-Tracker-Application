@@ -121,8 +121,14 @@ def verify_loop():
                         print("📤 Attempting incident upload...")
                         send_incident(image_path)
                         print("✅ Incident upload request sent")
-                    except Exception as e:print("❌ Incident upload failed:", e)
 
+                        # 🧹 delete local file after successful upload
+                        if os.path.exists(image_path):
+                            os.remove(image_path)
+                            print("🗑 Local file deleted")
+
+                    except Exception as e:
+                        print("❌ Incident upload failed:", e)
                 suspect_active = True
             else:
                 if suspect_active:
