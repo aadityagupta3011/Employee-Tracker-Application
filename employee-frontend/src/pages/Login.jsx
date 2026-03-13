@@ -38,10 +38,10 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
       <div className="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-md">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
-          Welcome Back 👋
+          Welcome 👋
         </h2>
         <p className="text-center text-gray-500 mb-8">
-          Login to your (Admin/Employee) panel
+          Login 
         </p>
 
         <div className="space-y-5">
@@ -51,7 +51,7 @@ export default function Login() {
             </label>
             <input
               type="email"
-              placeholder="admin@example.com"
+              placeholder="abc@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
