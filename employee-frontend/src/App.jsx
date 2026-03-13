@@ -5,7 +5,7 @@ import Login from "./pages/Login.jsx";
 import Navbar from "./components/Navbar.jsx";
 import AdminHome from "./pages/AdminHome.jsx";
 import AdminEmployees from "./pages/AdminEmployees.jsx";
-import AdminDashboard from "./pages/adminDashboard.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 import AdminProfile from "./pages/AdminProfile.jsx";
 import AdminIncidents from "./pages/adminIncident.jsx";
 import EmployeeNavbar from "./components/EmployeeNavbar.jsx";
