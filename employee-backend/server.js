@@ -9,7 +9,9 @@ connectDB();
 
 app.use(cors());
 app.use(express.json());
-
+app.get('/',(req,res)=>{
+  res.send("Hello , Backend is working...")
+})
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/agent", require("./routes/agentRoutes"));
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
