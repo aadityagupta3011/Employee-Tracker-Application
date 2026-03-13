@@ -1,12 +1,12 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Login from "./pages/Login.jsx";
 import Navbar from "./components/Navbar.jsx";
-import AdminHome from "./pages/AdminHome";
-import AdminEmployees from "./pages/AdminEmployees";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminProfile from "./pages/AdminProfile";
+import AdminHome from "./pages/AdminHome.jsx";
+import AdminEmployees from "./pages/AdminEmployees.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
+import AdminProfile from "./pages/AdminProfile.jsx";
 import AdminIncidents from "./pages/adminIncident.jsx";
 import EmployeeNavbar from "./components/EmployeeNavbar.jsx";
 import EmployeeDashboard from "./pages/employeeDashboard.jsx";
