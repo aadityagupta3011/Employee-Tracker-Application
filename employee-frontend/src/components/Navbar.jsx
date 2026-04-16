@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { Menu, X } from "lucide-react";
-
+import { NavLink } from "react-router-dom";
 const navItems = [
   { path: "/", label: "Overview" },
   { path: "/employees", label: "Employees" },
@@ -31,13 +31,9 @@ export default function Navbar() {
     localStorage.clear();
     navigate("/login");
   };
-
-  const navLinkClass = (path) =>
-    `rounded-full px-4 py-2 text-sm font-semibold transition break-words ${
-      location.pathname === path
-        ? "bg-[#1f3a33] text-white shadow-sm"
-        : "text-stone-600 hover:bg-[#1f3a33] hover:text-white"
-    }`;
+  
+const navLinkClass = (path) =>
+  "px-4 py-2 rounded-full transition duration-300 text-black hover:bg-black hover:!text-white";
 
   return (
     <nav className="sticky top-0 z-40 border-b border-[rgba(83,61,39,0.08)] bg-[rgba(248,243,235,0.78)] backdrop-blur-xl">
@@ -56,17 +52,23 @@ export default function Navbar() {
           </div>
         </div>
 
-        <div className="hidden items-center gap-2 rounded-full border border-[rgba(83,61,39,0.08)] bg-white/70 p-1.5 lg:flex">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={navLinkClass(item.path)}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
+<div className="hidden items-center gap-2 rounded-full border border-[rgba(83,61,39,0.08)] bg-white/70 p-1.5 lg:flex">
+  {navItems.map((item) => (
+    <NavLink
+      key={item.path}
+      to={item.path}
+      className={({ isActive }) =>
+        `px-4 py-2 rounded-full transition duration-300 ${
+          isActive
+            ? "bg-black !text-white"
+            : "text-black hover:bg-black hover:!text-white"
+        }`
+      }
+    >
+      {item.label}
+    </NavLink>
+  ))}
+</div>
 
         <div className="hidden items-center gap-3 lg:flex">
           <div className="flex items-center gap-3 rounded-full border border-[rgba(83,61,39,0.1)] bg-white/80 px-3 py-2">
