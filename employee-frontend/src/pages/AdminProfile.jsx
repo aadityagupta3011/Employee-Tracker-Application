@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import api from "../api/axios";
+import { useQuery } from "@tanstack/react-query";
 
 export default function AdminProfile() {
 
-  const [admin, setAdmin] = useState(null);
+  // const [admin, setAdmin] = useState(null);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -13,18 +14,24 @@ export default function AdminProfile() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
 
   /* ================= FETCH PROFILE ================= */
-  useEffect(() => {
-    api.get("/auth/me")
-      .then(res => {
-        setAdmin(res.data);
-        setName(res.data.name);
-        setEmail(res.data.email);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  
+  const { data: admin, isLoading } = useQuery({
+  queryKey: ["adminProfile"],
+  queryFn: async () => {
+    const res = await api.get("/auth/me");
+    return res.data;
+  },
+  staleTime: 1000 * 60 * 5,
+});
+useEffect(() => {
+  if (admin) {
+    setName(admin.name);
+    setEmail(admin.email);
+  }
+}, [admin]);
 
   /* ================= UPDATE PROFILE ================= */
   const handleUpdateProfile = async () => {
@@ -36,7 +43,7 @@ export default function AdminProfile() {
     }
   }; 
 
-  if (loading) return <p className="p-8">Loading profile...</p>;
+  if (isLoading) return <p className="p-8">Loading profile...</p>;
 
   return (
     <div className="min-h-screen bg-gray-50">
