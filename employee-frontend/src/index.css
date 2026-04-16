@@ -31,9 +31,8 @@ body {
   font-family: "Manrope", "Segoe UI", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(197, 127, 50, 0.16), transparent 26rem),
-    radial-gradient(circle at top right, rgba(31, 58, 51, 0.14), transparent 22rem),
-    linear-gradient(180deg, #f8f3eb 0%, var(--bg) 52%, #f7f0e6 100%);
+    radial-gradient(circle at top left, rgba(197, 127, 50, 0.1), transparent 24rem),
+    linear-gradient(180deg, #f8f3eb 0%, var(--bg) 55%, #f7f0e6 100%);
 }
 
 a {
@@ -82,13 +81,13 @@ textarea {
 }
 
 .surface-card {
-  @apply rounded-[24px] border p-4 shadow-[0_18px_45px_rgba(44,32,20,0.08)] backdrop-blur-xl sm:rounded-[28px] sm:p-6;
+  @apply rounded-[24px] border p-4 shadow-[0_12px_24px_rgba(44,32,20,0.05)] backdrop-blur-xl sm:rounded-[28px] sm:p-6;
   border-color: var(--line);
   background: linear-gradient(180deg, var(--panel-strong), var(--panel));
 }
 
 .subtle-card {
-  @apply rounded-[20px] border p-4 shadow-[0_12px_30px_rgba(44,32,20,0.05)] sm:rounded-[24px] sm:p-5;
+  @apply rounded-[20px] border p-4 shadow-[0_8px_18px_rgba(44,32,20,0.04)] sm:rounded-[24px] sm:p-5;
   border-color: var(--line);
   background: rgba(255, 255, 255, 0.72);
 }
@@ -118,7 +117,7 @@ textarea {
 .btn-primary {
   @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-50;
   background: linear-gradient(135deg, #1f3a33, #31554a);
-  box-shadow: 0 14px 28px rgba(31, 58, 51, 0.2);
+  box-shadow: 0 10px 18px rgba(31, 58, 51, 0.14);
 }
 
 .btn-primary:hover {
@@ -152,7 +151,7 @@ textarea {
   @apply overflow-hidden rounded-[28px] border;
   border-color: var(--line);
   background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 16px 40px rgba(44, 32, 20, 0.06);
+  box-shadow: 0 10px 24px rgba(44, 32, 20, 0.05);
 }
 
 .table-shell table {

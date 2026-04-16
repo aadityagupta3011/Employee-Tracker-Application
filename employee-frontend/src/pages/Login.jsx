@@ -13,6 +13,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [isWaking, setIsWaking] = useState(false);
   const [serverAwake, setServerAwake] = useState(false);
+  const [countdown, setCountdown] = useState(0);
 
   const navigate = useNavigate();
 
@@ -25,17 +26,36 @@ export default function Login() {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    if (!isWaking || countdown <= 0) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setCountdown((current) => {
+        if (current <= 1) {
+          window.clearInterval(intervalId);
+          setIsWaking(false);
+          setServerAwake(true);
+          return 0;
+        }
+
+        return current - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [isWaking, countdown]);
+
   const wakeServer = async () => {
+    setServerAwake(false);
+    setIsWaking(true);
+    setCountdown(12);
+
     try {
-      setIsWaking(true);
       await api.get("/auth/me");
     } catch {
       // Render instances can return an error while the service is waking up.
-    } finally {
-      window.setTimeout(() => {
-        setServerAwake(true);
-        setIsWaking(false);
-      }, 12000);
     }
   };
 
@@ -58,6 +78,8 @@ export default function Login() {
     }
   };
 
+  const formatCountdown = (value) => `00:${String(value).padStart(2, "0")}`;
+
   return (
     <div className="app-shell flex min-h-screen items-center justify-center px-4 py-8 sm:px-6">
       <div className="grid w-full max-w-6xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -75,10 +97,9 @@ export default function Login() {
               clear and structured interface.
             </p>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              <FeatureBlock title="Live activity" value="Real-time usage feed" />
-              <FeatureBlock title="Incident review" value="Snapshots with reasons" />
-              <FeatureBlock title="Team insights" value="Focus and active time" />
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              <FeatureBlock title="Activity monitoring" value="Live visibility into usage and engagement" />
+              <FeatureBlock title="Incident tracking" value="Captured events with timestamps and evidence" />
             </div>
 
             <div className="mt-10 grid gap-4 md:grid-cols-2">
@@ -105,7 +126,9 @@ export default function Login() {
                 Sign in
               </h2>
             </div>
-            <div className="pill">{serverAwake ? "Server ready" : "Wake required"}</div>
+            <div className="pill">
+              {serverAwake ? "Server ready" : isWaking ? `Ready in ${formatCountdown(countdown)}` : "Wake required"}
+            </div>
           </div>
 
           <div className="mt-8 space-y-5">
@@ -136,13 +159,20 @@ export default function Login() {
             </label>
 
             {!serverAwake && (
-              <button
-                onClick={wakeServer}
-                disabled={isWaking}
-                className="btn-secondary w-full"
-              >
-                {isWaking ? "Waking server..." : "Wake server once before login"}
-              </button>
+              <div className="space-y-3">
+                <button
+                  onClick={wakeServer}
+                  disabled={isWaking}
+                  className="btn-secondary w-full"
+                >
+                  {isWaking ? `Server starting: ${formatCountdown(countdown)}` : "Wake server"}
+                </button>
+                {isWaking ? (
+                  <p className="text-sm text-stone-500">
+                    The login button will become available when the countdown reaches zero.
+                  </p>
+                ) : null}
+              </div>
             )}
 
             <button
@@ -155,8 +185,8 @@ export default function Login() {
           </div>
 
           <div className="mt-8 rounded-[24px] border border-[rgba(83,61,39,0.1)] bg-[#f8f3eb] p-4 text-sm leading-6 text-stone-600">
-            If the backend is cold, use the wake action once before signing in.
-            After the service becomes available, normal login will continue.
+            If the backend is idle, start it once and wait for the countdown to
+            finish before entering the dashboard.
           </div>
         </section>
       </div>
