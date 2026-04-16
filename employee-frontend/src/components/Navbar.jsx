@@ -33,7 +33,7 @@ export default function Navbar() {
   };
 
   const navLinkClass = (path) =>
-    `rounded-full px-4 py-2 text-sm font-semibold transition ${
+    `rounded-full px-4 py-2 text-sm font-semibold transition break-words ${
       location.pathname === path
         ? "bg-[#1f3a33] text-white shadow-[0_12px_24px_rgba(31,58,51,0.18)]"
         : "text-stone-600 hover:bg-white/80 hover:text-stone-900"
@@ -42,15 +42,15 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-40 border-b border-[rgba(83,61,39,0.08)] bg-[rgba(248,243,235,0.78)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3">
+        <div className="min-w-0 flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1f3a33] text-sm font-bold tracking-[0.2em] text-white">
             WT
           </div>
-          <div>
-            <p className="text-lg font-extrabold tracking-tight text-stone-900">
+          <div className="min-w-0">
+            <p className="truncate text-base font-extrabold tracking-tight text-stone-900 sm:text-lg">
               WorkTrack Admin
             </p>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-500">
+            <p className="truncate text-[11px] font-medium uppercase tracking-[0.18em] text-stone-500 sm:text-xs">
               Operations Console
             </p>
           </div>

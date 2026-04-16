@@ -80,19 +80,19 @@ export default function AdminIncidents() {
               const employee = getEmployee(item.employeeId);
               return (
                 <article key={item._id} className="surface-card !p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-3">
                       <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f7e3c4] text-sm font-bold text-[#8d591d]">
                         {employee?.name?.charAt(0)?.toUpperCase() || "?"}
                       </div>
-                      <div>
-                        <p className="font-semibold text-stone-900">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-stone-900">
                           {employee?.name || "Unknown employee"}
                         </p>
-                        <p className="text-xs text-stone-500">{item.email}</p>
+                        <p className="break-words text-xs text-stone-500">{item.email}</p>
                       </div>
                     </div>
-                    <span className="rounded-full bg-[#fde2e2] px-3 py-1 text-xs font-semibold text-[#9f3d34]">
+                    <span className="w-fit rounded-full bg-[#fde2e2] px-3 py-1 text-xs font-semibold text-[#9f3d34]">
                       {item.reason?.replaceAll("_", " ")}
                     </span>
                   </div>
@@ -109,7 +109,7 @@ export default function AdminIncidents() {
                   </button>
 
                   <div className="mt-4 rounded-[20px] bg-[#f8f3eb] p-4 text-sm text-stone-600">
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <span>{formatDate(item.timestamp)}</span>
                       <span>{formatTime(item.timestamp)}</span>
                     </div>

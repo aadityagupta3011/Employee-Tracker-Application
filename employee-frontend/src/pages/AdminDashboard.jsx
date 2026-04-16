@@ -120,7 +120,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <section className="grid gap-4 md:grid-cols-3">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <MetricCard label="Employees tracked" value={employees.length} detail="Current roster" />
           <MetricCard label="Average focus" value={`${averageFocus}%`} detail="Across all employees" />
           <MetricCard label="Active hours logged" value={totalActiveHours} detail="Combined total" />
@@ -137,7 +137,7 @@ export default function AdminDashboard() {
 
             <div className="space-y-6 lg:col-span-7">
               <div className="surface-card relative">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <span className="eyebrow">Quick mail</span>
                     <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-stone-900">
@@ -267,7 +267,7 @@ export default function AdminDashboard() {
                   Add a new account
                 </h2>
 
-                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                  <div className="mt-6 grid gap-4 md:grid-cols-2">
                   <input
                     placeholder="Full name"
                     value={empName}
@@ -339,7 +339,7 @@ function Leaderboard({ title, data, tone }) {
 
   return (
     <div className="surface-card">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-extrabold tracking-tight text-stone-900">
           {title}
         </h2>
@@ -355,9 +355,9 @@ function Leaderboard({ title, data, tone }) {
           data.map((emp, index) => (
             <div
               key={emp.employeeId}
-              className="flex items-center justify-between gap-3 rounded-[22px] bg-white/70 p-4"
+              className="flex flex-col gap-4 rounded-[22px] bg-white/70 p-4 sm:flex-row sm:items-center sm:justify-between"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <span className={`w-7 text-sm font-extrabold ${toneStyles.rank}`}>
                   #{index + 1}
                 </span>
@@ -366,13 +366,13 @@ function Leaderboard({ title, data, tone }) {
                 >
                   {emp.name?.charAt(0)?.toUpperCase() || "?"}
                 </div>
-                <div>
-                  <p className="font-semibold text-stone-900">{emp.name}</p>
-                  <p className="text-xs text-stone-500">{emp.email}</p>
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-stone-900">{emp.name}</p>
+                  <p className="truncate text-xs text-stone-500">{emp.email}</p>
                 </div>
               </div>
 
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <p className={`text-lg font-extrabold ${toneStyles.score}`}>
                   {emp.focusScore || 0}%
                 </p>

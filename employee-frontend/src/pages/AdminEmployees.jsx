@@ -58,7 +58,7 @@ export default function AdminEmployees() {
 
       <main className="page-wrap space-y-6">
         <div className="page-header">
-          <div>
+          <div className="min-w-0">
             <span className="eyebrow">Employees</span>
             <h1 className="page-title mt-4">Directory with activity context</h1>
             <p className="page-subtitle mt-3">
@@ -163,17 +163,17 @@ export default function AdminEmployees() {
           ) : (
             filteredEmployees.map((emp) => (
               <div key={emp.employeeId} className="surface-card !p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-lg font-bold tracking-tight text-stone-900">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="truncate text-lg font-bold tracking-tight text-stone-900">
                       {emp.name}
                     </p>
-                    <p className="text-sm text-stone-500">{emp.email}</p>
+                    <p className="break-words text-sm text-stone-500">{emp.email}</p>
                   </div>
-                  <span className="pill">{emp.focusScore || 0}%</span>
+                  <span className="pill self-start">{emp.focusScore || 0}%</span>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between text-sm text-stone-600">
+                <div className="mt-4 flex flex-col gap-2 text-sm text-stone-600 sm:flex-row sm:items-center sm:justify-between">
                   <span>Active: {formatMinutes(Math.floor((emp.activeSeconds || 0) / 60))}</span>
                   <span>Idle: {formatMinutes(Math.floor((emp.idleSeconds || 0) / 60))}</span>
                 </div>

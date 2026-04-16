@@ -115,9 +115,9 @@ export default function AdminHome() {
 
             <div className="mt-6 rounded-[24px] border border-[rgba(83,61,39,0.08)] bg-white/70 p-5">
               <p className="text-sm leading-6 text-stone-600">
-                Design intentionally simple rakha gaya hai so that data front and
-                center rahe. Fancy effects se zyada emphasis readability, spacing,
-                and everyday usability par hai.
+                The interface is intentionally restrained so that information
+                remains easy to scan. The focus is on readability, structure,
+                and day-to-day usability rather than decorative effects.
               </p>
             </div>
           </div>

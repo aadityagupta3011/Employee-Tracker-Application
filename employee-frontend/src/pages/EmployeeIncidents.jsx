@@ -66,12 +66,12 @@ export default function EmployeeIncidents() {
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {incidents.map((item) => (
               <article key={item._id} className="surface-card !p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="font-semibold text-stone-900">{item.email}</p>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="break-words font-semibold text-stone-900">{item.email}</p>
                     <p className="text-xs text-stone-500">Incident detected</p>
                   </div>
-                  <span className="rounded-full bg-[#fde2e2] px-3 py-1 text-xs font-semibold text-[#9f3d34]">
+                  <span className="w-fit rounded-full bg-[#fde2e2] px-3 py-1 text-xs font-semibold text-[#9f3d34]">
                     {item.reason?.replaceAll("_", " ")}
                   </span>
                 </div>
@@ -88,7 +88,7 @@ export default function EmployeeIncidents() {
                 </button>
 
                 <div className="mt-4 rounded-[20px] bg-[#f8f3eb] p-4 text-sm text-stone-600">
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <span>{formatDate(item.timestamp)}</span>
                     <span>{formatTime(item.timestamp)}</span>
                   </div>

@@ -56,7 +56,7 @@ textarea {
 }
 
 .page-wrap {
-  @apply mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8;
+  @apply mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8;
 }
 
 .page-header {
@@ -71,8 +71,9 @@ textarea {
 }
 
 .page-title {
-  @apply text-3xl font-extrabold tracking-tight sm:text-4xl;
+  @apply text-[2rem] font-extrabold tracking-tight sm:text-4xl;
   color: #1d2b28;
+  line-height: 1.08;
 }
 
 .page-subtitle {
@@ -81,13 +82,13 @@ textarea {
 }
 
 .surface-card {
-  @apply rounded-[28px] border p-5 shadow-[0_18px_45px_rgba(44,32,20,0.08)] backdrop-blur-xl sm:p-6;
+  @apply rounded-[24px] border p-4 shadow-[0_18px_45px_rgba(44,32,20,0.08)] backdrop-blur-xl sm:rounded-[28px] sm:p-6;
   border-color: var(--line);
   background: linear-gradient(180deg, var(--panel-strong), var(--panel));
 }
 
 .subtle-card {
-  @apply rounded-[24px] border p-4 shadow-[0_12px_30px_rgba(44,32,20,0.05)] sm:p-5;
+  @apply rounded-[20px] border p-4 shadow-[0_12px_30px_rgba(44,32,20,0.05)] sm:rounded-[24px] sm:p-5;
   border-color: var(--line);
   background: rgba(255, 255, 255, 0.72);
 }
@@ -97,7 +98,7 @@ textarea {
 }
 
 .input-field {
-  @apply w-full rounded-2xl border px-4 py-3 text-sm outline-none transition duration-200 placeholder:text-gray-400;
+  @apply w-full min-w-0 rounded-2xl border px-4 py-3 text-sm outline-none transition duration-200 placeholder:text-gray-400;
   border-color: rgba(83, 61, 39, 0.14);
   background: rgba(255, 255, 255, 0.86);
 }
@@ -109,7 +110,7 @@ textarea {
 }
 
 .textarea-field {
-  @apply w-full rounded-2xl border px-4 py-3 text-sm outline-none transition duration-200 placeholder:text-gray-400;
+  @apply w-full min-w-0 rounded-2xl border px-4 py-3 text-sm outline-none transition duration-200 placeholder:text-gray-400;
   border-color: rgba(83, 61, 39, 0.14);
   background: rgba(255, 255, 255, 0.86);
 }
@@ -142,7 +143,7 @@ textarea {
 }
 
 .pill {
-  @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
+  @apply inline-flex max-w-full items-center rounded-full px-3 py-1 text-center text-xs font-semibold;
   background: var(--accent-soft);
   color: #8d591d;
 }
@@ -179,13 +180,13 @@ textarea {
 }
 
 .metric-card {
-  @apply rounded-[24px] border p-5;
+  @apply rounded-[22px] border p-4 sm:rounded-[24px] sm:p-5;
   border-color: rgba(83, 61, 39, 0.12);
   background: rgba(255, 255, 255, 0.68);
 }
 
 .metric-value {
-  @apply mt-3 text-3xl font-extrabold tracking-tight;
+  @apply mt-3 break-words text-[1.75rem] font-extrabold tracking-tight sm:text-3xl;
   color: #1d2b28;
 }
 
@@ -194,4 +195,9 @@ textarea {
   border-color: var(--line);
   background: rgba(255, 255, 255, 0.68);
   color: var(--muted);
+}
+
+img {
+  max-width: 100%;
+  display: block;
 }

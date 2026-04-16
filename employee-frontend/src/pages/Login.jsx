@@ -61,18 +61,18 @@ export default function Login() {
   return (
     <div className="app-shell flex min-h-screen items-center justify-center px-4 py-8 sm:px-6">
       <div className="grid w-full max-w-6xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="surface-card relative overflow-hidden !p-8 sm:!p-10">
+        <section className="surface-card relative overflow-hidden !p-5 sm:!p-8 lg:!p-10">
           <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_left,rgba(197,127,50,0.24),transparent_60%)]" />
 
           <div className="relative">
             <span className="eyebrow">Employee Tracker</span>
-            <h1 className="mt-5 max-w-xl text-4xl font-extrabold tracking-tight text-[#1d2b28] sm:text-5xl">
-              Attendance dashboard nahi, proper work visibility.
+            <h1 className="mt-5 max-w-2xl text-3xl font-extrabold tracking-tight text-[#1d2b28] sm:text-4xl lg:text-5xl">
+              Professional visibility into employee activity and incidents.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-stone-600">
-              WorkTrack ek clean internal console hai jahan admin team daily
-              productivity, incidents, aur employee activity ko simple format
-              mein review kar sakti hai.
+              WorkTrack is an internal operations console designed to help teams
+              review productivity, incidents, and employee activity through a
+              clear and structured interface.
             </p>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -88,14 +88,15 @@ export default function Login() {
               />
               <CredentialCard
                 title="Employee Login"
-                lines={[employeeAccounts.join(", "), "Password: emp123"]}
+                lines={employeeAccounts}
+                footer="Password: emp123"
               />
             </div>
           </div>
         </section>
 
-        <section className="surface-card !p-8 sm:!p-10">
-          <div className="flex items-center justify-between gap-3">
+        <section className="surface-card !p-5 sm:!p-8 lg:!p-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#8d591d]">
                 Secure Access
@@ -153,9 +154,9 @@ export default function Login() {
             </button>
           </div>
 
-          <div className="mt-8 rounded-[24px] border border-[rgba(83,61,39,0.1)] bg-[#f8f3eb] p-4 text-sm text-stone-600">
-            Render backend cold start ki wajah se pehle wake button tap karna
-            pad sakta hai. Ek baar ready ho jaye, login normal chalega.
+          <div className="mt-8 rounded-[24px] border border-[rgba(83,61,39,0.1)] bg-[#f8f3eb] p-4 text-sm leading-6 text-stone-600">
+            If the backend is cold, use the wake action once before signing in.
+            After the service becomes available, normal login will continue.
           </div>
         </section>
       </div>
@@ -172,7 +173,7 @@ function FeatureBlock({ title, value }) {
   );
 }
 
-function CredentialCard({ title, lines }) {
+function CredentialCard({ title, lines, footer }) {
   return (
     <div className="subtle-card h-full">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#8d591d]">
@@ -184,6 +185,7 @@ function CredentialCard({ title, lines }) {
             {line}
           </p>
         ))}
+        {footer ? <p className="pt-1 font-medium text-stone-700">{footer}</p> : null}
       </div>
     </div>
   );

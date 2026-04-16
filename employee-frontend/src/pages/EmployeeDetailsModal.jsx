@@ -50,17 +50,17 @@ export default function EmployeeDetailsModal({ employee, onClose }) {
 
   return (
     <div className="modal-backdrop">
-      <div className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[32px] border border-[rgba(83,61,39,0.08)] bg-[#fbf7f0] p-5 shadow-2xl sm:p-7">
+      <div className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[28px] border border-[rgba(83,61,39,0.08)] bg-[#fbf7f0] p-4 shadow-2xl sm:rounded-[32px] sm:p-7">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex min-w-0 items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#f7e3c4] text-xl font-bold text-[#8d591d]">
               {employee.name?.charAt(0)?.toUpperCase() || "?"}
             </div>
-            <div>
-              <h2 className="text-2xl font-extrabold tracking-tight text-stone-900">
+            <div className="min-w-0">
+              <h2 className="truncate text-2xl font-extrabold tracking-tight text-stone-900">
                 {employee.name}
               </h2>
-              <p className="text-sm text-stone-500">{employee.email}</p>
+              <p className="break-words text-sm text-stone-500">{employee.email}</p>
             </div>
           </div>
 
