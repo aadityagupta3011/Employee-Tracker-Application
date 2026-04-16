@@ -1,219 +1,194 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import api from "../api/axios";
 import EmployeeDetailsModal from "./EmployeeDetailsModal.jsx";
 import Navbar from "../components/Navbar.jsx";
-import { useQuery } from "@tanstack/react-query";
+
+const formatMinutes = (mins) => {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+};
 
 export default function AdminEmployees() {
-
-  // const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [search, setSearch] = useState("");
-  // const [loading, setLoading] = useState(true);
-
-
   const [sortBy, setSortBy] = useState("focus");
   const [sortOrder, setSortOrder] = useState("desc");
 
-
-const { data: employees = [], isLoading } = useQuery({
-  queryKey: ["adminEmployees"],
-  queryFn: async () => {
-    const res = await api.get("/dashboard/admin");
-    return res.data;
-  },
-  staleTime: 1000 * 60 * 5,
-});
-
-  const formatMinutes = (mins) => {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    if (h === 0) return `${m}m`;
-    if (m === 0) return `${h}h`;
-    return `${h}h ${m}m`;
-  };
+  const { data: employees = [], isLoading } = useQuery({
+    queryKey: ["adminEmployees"],
+    queryFn: async () => {
+      const res = await api.get("/dashboard/admin");
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
   const handleSort = (type) => {
     if (sortBy === type) {
-      setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
       setSortBy(type);
       setSortOrder("desc");
     }
   };
 
-  const sortedEmployees = [...employees]
-    .filter(emp =>
-      emp.name.toLowerCase().includes(search.toLowerCase())
-    )
+  const filteredEmployees = [...employees]
+    .filter((emp) => {
+      const query = search.toLowerCase();
+      return (
+        emp.name?.toLowerCase().includes(query) || emp.email?.toLowerCase().includes(query)
+      );
+    })
     .sort((a, b) => {
-
       let value = 0;
-
-      if (sortBy === "active") value = a.activeSeconds - b.activeSeconds;
-      if (sortBy === "idle") value = a.idleSeconds - b.idleSeconds;
-      if (sortBy === "focus") value = a.focusScore - b.focusScore;
-      if (sortBy === "name") value = a.name.localeCompare(b.name);
-
+      if (sortBy === "active") value = (a.activeSeconds || 0) - (b.activeSeconds || 0);
+      if (sortBy === "idle") value = (a.idleSeconds || 0) - (b.idleSeconds || 0);
+      if (sortBy === "focus") value = (a.focusScore || 0) - (b.focusScore || 0);
+      if (sortBy === "name") value = (a.name || "").localeCompare(b.name || "");
       return sortOrder === "asc" ? value : -value;
     });
 
-  const SortButton = ({ type, label }) => (
-    <button
-      onClick={() => handleSort(type)}
-      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition
-      ${sortBy === type
-          ? "bg-indigo-600 text-white"
-          : "bg-white border hover:bg-gray-50"}
-      `}
-    >
-      {label}
-    </button>
-  );
-
   return (
-    <div className="min-h-screen bg-gray-50">
-
+    <div className="app-shell">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <main className="page-wrap space-y-6">
+        <div className="page-header">
+          <div>
+            <span className="eyebrow">Employees</span>
+            <h1 className="page-title mt-4">Directory with activity context</h1>
+            <p className="page-subtitle mt-3">
+              Search by name, sort by focus or time, and open a detailed usage
+              breakdown for any employee.
+            </p>
+          </div>
 
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-
-          <h2 className="text-3xl font-bold text-gray-800">
-            Employees
-          </h2>
-
-          <input
-            type="text"
-            placeholder="Search employee..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border rounded-xl px-4 py-2 w-full md:w-72 shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-          />
-
+          <div className="w-full max-w-sm">
+            <input
+              type="text"
+              placeholder="Search employee"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="input-field"
+            />
+          </div>
         </div>
-{/* SORT BUTTONS */}
-<div className="flex flex-wrap items-center gap-3 mb-4">
 
-  <span className="font-semibold text-gray-700 whitespace-nowrap">
-    Sort:
-  </span>
+        <section className="surface-card">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
+              Sort by
+            </span>
+            <SortButton active={sortBy === "focus"} onClick={() => handleSort("focus")}>
+              Focus %
+            </SortButton>
+            <SortButton active={sortBy === "active"} onClick={() => handleSort("active")}>
+              Active time
+            </SortButton>
+            <SortButton active={sortBy === "idle"} onClick={() => handleSort("idle")}>
+              Idle time
+            </SortButton>
+            <SortButton active={sortBy === "name"} onClick={() => handleSort("name")}>
+              A-Z
+            </SortButton>
+            <span className="pill">{sortOrder === "asc" ? "Ascending" : "Descending"}</span>
+          </div>
+        </section>
 
-  <SortButton type="focus" label="Focus %" />
-  <SortButton type="active" label="Active Time" />
-  <SortButton type="idle" label="Idle Time" />
-  <SortButton type="name" label="A–Z" />
-
-</div>
-
-        {/* DESKTOP TABLE */}
-        <div className="hidden md:block bg-white rounded-2xl shadow-sm border">
-
-          <table className="w-full">
-
-            <thead className="bg-gray-50 text-gray-600 text-sm">
-              <tr>
-                <th className="p-4 text-left">Employee</th>
-                <th className="p-4">Active</th>
-                <th className="p-4">Idle</th>
-                <th className="p-4">Focus</th>
-                <th className="p-4"></th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {isLoading ? (
+        <section className="hidden md:block">
+          <div className="table-shell">
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan="5" className="p-6 text-center text-gray-400">
-                    Loading employees...
-                  </td>
+                  <th>Employee</th>
+                  <th>Active</th>
+                  <th>Idle</th>
+                  <th>Focus</th>
+                  <th />
                 </tr>
-              ) : sortedEmployees.map(emp => (
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan="5" className="text-center text-stone-500">
+                      Loading employees...
+                    </td>
+                  </tr>
+                ) : (
+                  filteredEmployees.map((emp) => (
+                    <tr key={emp.employeeId} className="transition hover:bg-[rgba(248,243,235,0.72)]">
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f7e3c4] text-sm font-bold text-[#8d591d]">
+                            {emp.name?.charAt(0)?.toUpperCase() || "?"}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-stone-900">{emp.name}</p>
+                            <p className="text-xs text-stone-500">{emp.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="font-semibold text-stone-700">
+                        {formatMinutes(Math.floor((emp.activeSeconds || 0) / 60))}
+                      </td>
+                      <td className="text-stone-500">
+                        {formatMinutes(Math.floor((emp.idleSeconds || 0) / 60))}
+                      </td>
+                      <td>
+                        <span className="pill">{emp.focusScore || 0}% focus</span>
+                      </td>
+                      <td className="text-right">
+                        <button
+                          onClick={() => setSelectedEmployee(emp)}
+                          className="btn-primary !px-4 !py-2.5"
+                        >
+                          View details
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-                <tr key={emp.employeeId} className="border-t hover:bg-gray-50">
-
-                  <td className="p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
-                      {emp.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800">{emp.name}</p>
-                      <p className="text-sm text-gray-500">{emp.email}</p>
-                    </div>
-                  </td>
-
-                  <td className="p-4 text-center font-medium">
-                    {formatMinutes(Math.floor(emp.activeSeconds / 60))}
-                  </td>
-
-                  <td className="p-4 text-center text-gray-500">
-                    {formatMinutes(Math.floor(emp.idleSeconds / 60))}
-                  </td>
-
-                  <td className="p-4 text-center">
-                    <span className="px-3 py-1 text-sm rounded-full bg-green-100 text-green-600 font-semibold">
-                      {emp.focusScore}%
-                    </span>
-                  </td>
-
-                  <td className="p-4 text-right">
-                    <button
-                      onClick={() => setSelectedEmployee(emp)}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm shadow"
-                    >
-                      View Details
-                    </button>
-                  </td>
-
-                </tr>
-
-              ))}
-
-            </tbody>
-
-          </table>
-        </div>
-
-        {/* MOBILE CARDS */}
-        <div className="md:hidden space-y-4">
-
-          {sortedEmployees.map(emp => (
-
-            <div key={emp.employeeId} className="bg-white p-4 rounded-2xl shadow-sm border">
-
-              <div className="flex justify-between items-center mb-3">
-                <div>
-                  <p className="font-semibold">{emp.name}</p>
-                  <p className="text-sm text-gray-500">{emp.email}</p>
+        <section className="space-y-4 md:hidden">
+          {isLoading ? (
+            <div className="empty-state">Loading employees...</div>
+          ) : (
+            filteredEmployees.map((emp) => (
+              <div key={emp.employeeId} className="surface-card !p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-lg font-bold tracking-tight text-stone-900">
+                      {emp.name}
+                    </p>
+                    <p className="text-sm text-stone-500">{emp.email}</p>
+                  </div>
+                  <span className="pill">{emp.focusScore || 0}%</span>
                 </div>
 
-                <span className="text-green-600 font-bold">
-                  {emp.focusScore}%
-                </span>
+                <div className="mt-4 flex items-center justify-between text-sm text-stone-600">
+                  <span>Active: {formatMinutes(Math.floor((emp.activeSeconds || 0) / 60))}</span>
+                  <span>Idle: {formatMinutes(Math.floor((emp.idleSeconds || 0) / 60))}</span>
+                </div>
+
+                <button
+                  onClick={() => setSelectedEmployee(emp)}
+                  className="btn-primary mt-4 w-full"
+                >
+                  View details
+                </button>
               </div>
-
-              <div className="flex justify-between text-sm text-gray-600 mb-3">
-                <p>Active: {formatMinutes(Math.floor(emp.activeSeconds / 60))}</p>
-                <p>Idle: {formatMinutes(Math.floor(emp.idleSeconds / 60))}</p>
-              </div>
-
-              <button
-                onClick={() => setSelectedEmployee(emp)}
-                className="w-full bg-indigo-600 text-white py-2 rounded-lg"
-              >
-                View Details
-              </button>
-
-            </div>
-
-          ))}
-
-        </div>
-
-      </div>
+            ))
+          )}
+        </section>
+      </main>
 
       {selectedEmployee && (
         <EmployeeDetailsModal
@@ -221,7 +196,21 @@ const { data: employees = [], isLoading } = useQuery({
           onClose={() => setSelectedEmployee(null)}
         />
       )}
-
     </div>
+  );
+}
+
+function SortButton({ active, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+        active
+          ? "bg-[#1f3a33] text-white"
+          : "border border-[rgba(83,61,39,0.12)] bg-white/70 text-stone-700 hover:bg-white"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

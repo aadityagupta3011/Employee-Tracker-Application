@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from "react";
-import EmployeeNavbar from "../components/EmployeeNavbar";
-import api from "../api/axios";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
 } from "recharts";
+import EmployeeNavbar from "../components/EmployeeNavbar";
+import api from "../api/axios";
 
-/* ================= TIME FORMAT ================= */
-const formatTime = (seconds) => {
+const formatTime = (seconds = 0) => {
   const totalMinutes = Math.floor(seconds / 60);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
@@ -27,133 +26,114 @@ export default function EmployeeDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/dashboard/employee")
+    api
+      .get("/dashboard/employee")
       .then((res) => setData(res.data))
       .finally(() => setLoading(false));
   }, []);
 
+  const chartData = useMemo(() => {
+    if (!data?.appUsage) return [];
+
+    return Object.entries(data.appUsage)
+      .map(([app, seconds]) => ({
+        name: app.replace("_exe", "").replace("(neutral)", "").slice(0, 12),
+        minutes: Number((seconds / 60).toFixed(1)),
+      }))
+      .sort((a, b) => b.minutes - a.minutes);
+  }, [data]);
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="app-shell">
         <EmployeeNavbar />
-        <p className="p-6">Loading...</p>
+        <main className="page-wrap">
+          <div className="empty-state">Loading activity...</div>
+        </main>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="app-shell">
         <EmployeeNavbar />
-        <p className="p-6 text-gray-500">No data found</p>
+        <main className="page-wrap">
+          <div className="empty-state">No activity data found.</div>
+        </main>
       </div>
     );
   }
 
-  const total = data.activeSeconds + data.idleSeconds;
-  const focus =
-    total > 0 ? ((data.activeSeconds / total) * 100).toFixed(2) : 0;
-
-  /* ================= CHART DATA ================= */
-
-  const chartData = Object.entries(data.appUsage || {})
-    .map(([app, seconds]) => ({
-      name: app.replace("_exe", "").replace("(neutral)", "").slice(0, 12),
-      minutes: (seconds / 60).toFixed(1),
-    }))
-    .sort((a, b) => b.minutes - a.minutes);
+  const total = (data.activeSeconds || 0) + (data.idleSeconds || 0);
+  const focus = total > 0 ? ((data.activeSeconds / total) * 100).toFixed(1) : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="app-shell">
       <EmployeeNavbar />
 
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-
-        <h2 className="text-3xl font-bold text-gray-800">
-          My Activity Dashboard
-        </h2>
-
-        {/* ===== STATS ===== */}
-        <div className="grid md:grid-cols-3 gap-6">
-
-          <StatCard
-            title="Active Time"
-            value={formatTime(data.activeSeconds)}
-            color="green"
-          />
-
-          <StatCard
-            title="Idle Time"
-            value={formatTime(data.idleSeconds)}
-            color="red"
-          />
-
-          <StatCard
-            title="Focus Score"
-            value={`${focus}%`}
-            color="indigo"
-          />
-
+      <main className="page-wrap space-y-8">
+        <div className="page-header">
+          <div>
+            <span className="eyebrow">My Dashboard</span>
+            <h1 className="page-title mt-4">Your daily activity summary</h1>
+            <p className="page-subtitle mt-3">
+              A simple view of active time, idle time, focus score, and your top
+              application usage.
+            </p>
+          </div>
         </div>
 
-        {/* ===== CHART ===== */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border">
-          <h3 className="font-bold mb-4">App Usage</h3>
+        <section className="grid gap-4 md:grid-cols-3">
+          <StatCard title="Active time" value={formatTime(data.activeSeconds)} />
+          <StatCard title="Idle time" value={formatTime(data.idleSeconds)} />
+          <StatCard title="Focus score" value={`${focus}%`} />
+        </section>
 
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={chartData} barCategoryGap={25}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar
-                dataKey="minutes"
-                fill="#6366f1"
-                radius={[8, 8, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <section className="surface-card">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <span className="eyebrow">App Usage</span>
+              <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-stone-900">
+                Where your time went
+              </h2>
+            </div>
+          </div>
 
-      </div>
+          <div className="mt-8 h-[340px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} barCategoryGap={18}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#dbcdb9" />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#6b7280" }} />
+                <YAxis tick={{ fontSize: 12, fill: "#6b7280" }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="minutes" fill="#1f3a33" radius={[10, 10, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
 
-/* ================= TOOLTIP ================= */
-
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow">
-        {payload[0].payload.name} : {payload[0].value} min
+      <div className="rounded-2xl bg-[#1f3a33] px-3 py-2 text-sm text-white shadow-lg">
+        {payload[0].payload.name}: {payload[0].value} min
       </div>
     );
   }
+
   return null;
 };
 
-/* ================= CARD ================= */
-
-function StatCard({ title, value, color }) {
-  const colors = {
-    green: "bg-green-100 text-green-600",
-    red: "bg-red-100 text-red-600",
-    indigo: "bg-indigo-100 text-indigo-600",
-  };
-
+function StatCard({ title, value }) {
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border flex justify-between items-center hover:shadow-md transition">
-      <div>
-        <p className="text-sm text-gray-500">{title}</p>
-        <h3 className="text-2xl font-bold">{value}</h3>
-      </div>
-
-      <div
-        className={`w-11 h-11 rounded-full flex items-center justify-center font-bold ${colors[color]}`}
-      >
-        {title.charAt(0)}
-      </div>
+    <div className="metric-card">
+      <p className="text-sm font-semibold text-stone-500">{title}</p>
+      <div className="metric-value">{value}</div>
     </div>
   );
 }

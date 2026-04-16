@@ -1,197 +1,128 @@
 import Navbar from "../components/Navbar";
 
+const featureGroups = [
+  {
+    title: "Daily oversight",
+    description: "See who is active, who is drifting, and where the team's time is going.",
+  },
+  {
+    title: "Incident review",
+    description: "Open suspicious snapshots with reason tags and timestamps in one place.",
+  },
+  {
+    title: "People management",
+    description: "Create employee accounts, review individual usage, and reach out quickly.",
+  },
+];
+
+const workflowSteps = [
+  "Desktop tracker records activity and idle time.",
+  "Backend stores events and processed snapshots.",
+  "Admin dashboard turns raw data into clear summaries.",
+  "Managers can act on trends without digging through logs.",
+];
+
+const stackItems = [
+  "React dashboard",
+  "Node and Express API",
+  "MongoDB storage",
+  "Python tracker",
+  "OpenCV checks",
+  "Cloud image uploads",
+];
+
 export default function AdminHome() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-
+    <div className="app-shell">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
+      <main className="page-wrap space-y-8">
+        <section className="surface-card overflow-hidden !p-0">
+          <div className="grid gap-0 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="p-7 sm:p-10">
+              <span className="eyebrow">Admin Overview</span>
+              <h1 className="mt-5 max-w-3xl text-4xl font-extrabold tracking-tight text-[#1d2b28] sm:text-5xl">
+                Built for teams that want clean visibility, not dashboard noise.
+              </h1>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-stone-600">
+                WorkTrack helps you monitor daily productivity, review incidents,
+                and understand employee engagement through a calm, practical admin
+                workspace.
+              </p>
 
-        {/* HERO */}
-        <section className="text-center space-y-6">
+              <div className="mt-8 flex flex-wrap gap-3">
+                <span className="pill">Activity logs</span>
+                <span className="pill">Focus scoring</span>
+                <span className="pill">Incident snapshots</span>
+                <span className="pill">Employee directory</span>
+              </div>
+            </div>
 
-          <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-transparent bg-clip-text animate-pulse">
-            Smart Employee Tracking & Productivity Intelligence
-          </h1>
-
-          <p className="text-gray-600 max-w-3xl mx-auto text-lg">
-            An AI-powered monitoring ecosystem that captures real-time activity,
-            detects fake engagement, verifies identity using computer vision,
-            and transforms raw behavioral data into actionable performance insights.
-          </p>
-
-          <div className="flex justify-center gap-4 flex-wrap">
-            <Badge text="AI Monitoring" />
-            <Badge text="Real-time Analytics" />
-            <Badge text="Face Detection" />
-            <Badge text="Productivity Scoring" />
-          </div>
-
-        </section>
-
-        {/* PROBLEM → SOLUTION */}
-        <section className="grid md:grid-cols-2 gap-10 items-center">
-
-          <div className="space-y-4">
-            <h2 className="title">🎯 The Problem</h2>
-            <p className="text-gray-600 leading-relaxed">
-              In remote and hybrid work environments, traditional attendance systems fail
-              to measure actual productivity. Employees can simulate activity using fake
-              mouse movement, unauthorized users can operate systems, and managers lack
-              real-time visibility into performance.
-            </p>
-          </div>
-
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-2xl shadow-xl">
-            <h2 className="text-xl font-bold mb-3">💡 Our Solution</h2>
-            <p className="leading-relaxed">
-              A Python-powered intelligent desktop agent continuously monitors activity,
-              detects idle states, prevents fake engagement patterns, performs periodic
-              facial verification, and sends structured productivity data to a MERN
-              analytics dashboard for real-time decision making.
-            </p>
-          </div>
-
-        </section>
-
-        {/* CORE FEATURES */}
-        <section>
-          <h2 className="title text-center"> <span className="solid border-b-2 pb-1 " >
-            ⚡ Core Features
-            </span></h2>
-
-          <div className="grid md:grid-cols-3 gap-6 mt-8">
-
-            <FeatureCard
-              title="Real-Time Activity Tracking"
-              desc="Tracks active time, idle duration, and passive behavior using low-level system event monitoring."
-            />
-
-            <FeatureCard
-              title="Fake Mouse Movement Detection"
-              desc="Detects confined repetitive motion patterns to prevent analog watch or scripted activity fraud."
-            />
-
-            <FeatureCard
-              title="Application Intelligence"
-              desc="Classifies software into productive, neutral, and distracting categories to compute focus score."
-            />
-
-            <FeatureCard
-              title="AI Face Verification"
-              desc="Captures periodic snapshots and detects unauthorized users using OpenCV face comparison."
-            />
-
-            <FeatureCard
-              title="Incident Management"
-              desc="Automatically uploads suspicious activity images to Cloudinary and alerts the admin."
-            />
-
-            <FeatureCard
-              title="Admin Analytics Dashboard"
-              desc="Leaderboard, performance scoring, email communication, and workforce insights."
-            />
-
+            <div className="border-t border-[rgba(83,61,39,0.08)] bg-[#1f3a33] p-7 text-white lg:border-l lg:border-t-0 sm:p-10">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#e9c99d]">
+                What this console gives you
+              </p>
+              <div className="mt-6 space-y-4">
+                {featureGroups.map((group) => (
+                  <div
+                    key={group.title}
+                    className="rounded-[24px] border border-white/10 bg-white/8 p-4"
+                  >
+                    <h2 className="text-lg font-bold">{group.title}</h2>
+                    <p className="mt-2 text-sm leading-6 text-stone-200">
+                      {group.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* HOW IT WORKS */}
-        <section>
-          <h2 className="title text-center">  <span className="solid border-b-2 pb-1 " >⚙ System Workflow</span> </h2>
-
-          <div className="grid md:grid-cols-4 gap-6 mt-8 text-center">
-
-            <Step title="Python Agent" />
-            <Step title="Node API" />
-            <Step title="MongoDB Storage" />
-            <Step title="React Dashboard" />
-
-          </div>
-        </section>
-
-        {/* TECH STACK */}
-        <section>
-          <h2 className="title text-center"> <span className="solid border-b-2 pb-1 " >🛠 Technology Stack</span> </h2>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
-
-            <TechCard name="React" color="from-cyan-400 to-blue-500" />
-            <TechCard name="Node.js" color="from-green-400 to-emerald-500" />
-            <TechCard name="MongoDB" color="from-lime-400 to-green-600" />
-            <TechCard name="Express" color="from-gray-400 to-gray-600" />
-            <TechCard name="Python" color="from-yellow-400 to-orange-500" />
-            <TechCard name="OpenCV" color="from-pink-400 to-red-500" />
-            <TechCard name="Cloudinary" color="from-indigo-400 to-purple-500" />
-            <TechCard name="JWT Auth" color="from-orange-400 to-red-500" />
-
-          </div>
-        </section>
-
-        {/* FUTURE SCOPE */}
-        <section>
-          <h2 className="title text-center"> <span className="solid border-b-2 pb-1 " > 🔮 Future Roadmap</span> </h2>
-
-          <div className="grid md:grid-cols-3 gap-6 mt-8">
-
-            <FutureCard text="AI productivity prediction engine" />
-            <FutureCard text="Real-time WebSocket monitoring" />
-            <FutureCard text="Department level analytics" />
-            <FutureCard text="Automated warning & reward system" />
-            <FutureCard text="Mobile companion app" />
-            <FutureCard text="Cloud SaaS deployment" />
-
+        <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="surface-card">
+            <span className="eyebrow">Workflow</span>
+            <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-stone-900">
+              How the system flows
+            </h2>
+            <div className="mt-6 space-y-4">
+              {workflowSteps.map((step, index) => (
+                <div key={step} className="flex gap-4 rounded-[22px] bg-[#f8f3eb] p-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1f3a33] text-sm font-bold text-white">
+                    {index + 1}
+                  </div>
+                  <p className="text-sm leading-6 text-stone-600">{step}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
+          <div className="surface-card">
+            <span className="eyebrow">Coverage</span>
+            <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-stone-900">
+              The essentials are already in place
+            </h2>
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {stackItems.map((item) => (
+                <div key={item} className="subtle-card text-center">
+                  <p className="text-base font-bold tracking-tight text-stone-900">
+                    {item}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 rounded-[24px] border border-[rgba(83,61,39,0.08)] bg-white/70 p-5">
+              <p className="text-sm leading-6 text-stone-600">
+                Design intentionally simple rakha gaya hai so that data front and
+                center rahe. Fancy effects se zyada emphasis readability, spacing,
+                and everyday usability par hai.
+              </p>
+            </div>
+          </div>
         </section>
-
-      </div>
-    </div>
-  );
-}
-
-/* SMALL COMPONENTS */
-
-const title = "text-2xl font-bold text-gray-800";
-
-function Badge({ text }) {
-  return (
-    <span className="bg-indigo-100 text-indigo-600 px-4 py-1 rounded-full text-sm font-medium">
-      {text}
-    </span>
-  );
-}
-
-function FeatureCard({ title, desc }) {
-  return (
-    <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-2 transition-all">
-      <h3 className="font-bold mb-2 text-indigo-600">{title}</h3>
-      <p className="text-gray-600 text-sm">{desc}</p>
-    </div>
-  );
-}
-
-function Step({ title }) {
-  return (
-    <div className="bg-white p-6 rounded-2xl shadow hover:scale-105 transition">
-      <p className="font-semibold text-indigo-600">{title}</p>
-    </div>
-  );
-}
-
-function TechCard({ name, color }) {
-  return (
-    <div className={`bg-gradient-to-br ${color} text-white p-6 rounded-2xl shadow-lg
-    hover:scale-110 hover:rotate-1 transition-all text-center font-bold`}>
-      {name}
-    </div>
-  );
-}
-
-function FutureCard({ text }) {
-  return (
-    <div className="bg-white p-5 rounded-xl shadow hover:shadow-xl transition">
-      {text}
+      </main>
     </div>
   );
 }

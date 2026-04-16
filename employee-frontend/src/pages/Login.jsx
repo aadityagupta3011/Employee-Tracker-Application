@@ -1,52 +1,47 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
+
+const employeeAccounts = [
+  "aaditya@company.com",
+  "ekta@company.com",
+  "virat@company.com",
+];
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [isWaking, setIsWaking] = useState(false);
   const [serverAwake, setServerAwake] = useState(false);
 
   const navigate = useNavigate();
 
-  /* ================= AUTO REDIRECT ================= */
   useEffect(() => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
     if (token) {
-      if (role === "ADMIN") navigate("/dashboard");
-      else navigate("/employee-dashboard");
+      navigate(role === "ADMIN" ? "/dashboard" : "/employee-dashboard");
     }
-  }, []);
+  }, [navigate]);
 
-  /* ================= WAKE SERVER ================= */
   const wakeServer = async () => {
     try {
       setIsWaking(true);
-
-      // hit backend (even error is fine)
       await api.get("/auth/me");
-
-      // wait for backend to fully wake
-      setTimeout(() => {
-        setServerAwake(true);
-        setIsWaking(false);
-      }, 12000);
-    } catch (err) {
-      setTimeout(() => {
+    } catch {
+      // Render instances can return an error while the service is waking up.
+    } finally {
+      window.setTimeout(() => {
         setServerAwake(true);
         setIsWaking(false);
       }, 12000);
     }
   };
 
-  /* ================= LOGIN ================= */
   const handleLogin = async () => {
     if (!serverAwake) {
-      alert("Please wake the server first ⚡");
+      alert("Please wake the server first.");
       return;
     }
 
@@ -55,113 +50,140 @@ export default function Login() {
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.role);
+      if (res.data.name) localStorage.setItem("name", res.data.name);
 
-      if (res.data.role === "ADMIN") {
-        navigate("/dashboard");
-      } else {
-        navigate("/employee-dashboard");
-      }
-    } catch (err) {
-      alert("Invalid credentials ❌");
+      navigate(res.data.role === "ADMIN" ? "/dashboard" : "/employee-dashboard");
+    } catch {
+      alert("Invalid credentials.");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
-      <div className="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-md">
-        
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
-          Welcome 👋
-        </h2>
-        <p className="text-center text-gray-500 mb-6">
-          Login
-        </p>
+    <div className="app-shell flex min-h-screen items-center justify-center px-4 py-8 sm:px-6">
+      <div className="grid w-full max-w-6xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="surface-card relative overflow-hidden !p-8 sm:!p-10">
+          <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_left,rgba(197,127,50,0.24),transparent_60%)]" />
 
-        <div className="space-y-5">
-          
-          {/* EMAIL */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              placeholder="abc@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-            />
-          </div>
-
-          {/* PASSWORD */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-            />
-          </div>
-
-          {/* WAKE BUTTON */}
-          {!serverAwake && (
-            <button
-              onClick={wakeServer}
-              disabled={isWaking}
-              className="w-full bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600 transition font-semibold"
-            >
-              {isWaking ? "Waking server... ⏳" : "Wake Server ⚡ (Click once)"}
-            </button>
-          )}
-
-          {/* LOGIN BUTTON */}
-          <button
-            onClick={handleLogin}
-            disabled={!serverAwake}
-            className={`w-full py-2 rounded-lg font-semibold shadow-md transition
-              ${
-                serverAwake
-                  ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-          >
-            Sign In
-          </button>
-
-        </div>
-
-        {/* FOOTER */}
-        <p className="text-center text-sm text-gray-400 mt-6">
-          © 2026 Employee Tracker
-        </p>
-
-        {/* DEMO CREDS */}
-        <div className="flex flex-col md:flex-row gap-4 mt-4 text-sm">
-          
-          <div className="bg-gray-50 border rounded-xl p-4 shadow-sm w-full">
-            <h3 className="font-semibold text-gray-700 mb-2">
-              Admin Credentials
-            </h3>
-            <p>Email: admin@test.com</p>
-            <p>Password: admin123</p>
-          </div>
-
-          <div className="bg-gray-50 border rounded-xl p-4 shadow-sm w-full">
-            <h3 className="font-semibold text-gray-700 mb-2">
-              Employee Credentials
-            </h3>
-            <p className="text-xs break-words">
-              aaditya@company.com, ekta@company.com, virat@company.com
+          <div className="relative">
+            <span className="eyebrow">Employee Tracker</span>
+            <h1 className="mt-5 max-w-xl text-4xl font-extrabold tracking-tight text-[#1d2b28] sm:text-5xl">
+              Attendance dashboard nahi, proper work visibility.
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-stone-600">
+              WorkTrack ek clean internal console hai jahan admin team daily
+              productivity, incidents, aur employee activity ko simple format
+              mein review kar sakti hai.
             </p>
-            <p>Password: emp123</p>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              <FeatureBlock title="Live activity" value="Real-time usage feed" />
+              <FeatureBlock title="Incident review" value="Snapshots with reasons" />
+              <FeatureBlock title="Team insights" value="Focus and active time" />
+            </div>
+
+            <div className="mt-10 grid gap-4 md:grid-cols-2">
+              <CredentialCard
+                title="Admin Login"
+                lines={["admin@test.com", "Password: admin123"]}
+              />
+              <CredentialCard
+                title="Employee Login"
+                lines={[employeeAccounts.join(", "), "Password: emp123"]}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="surface-card !p-8 sm:!p-10">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#8d591d]">
+                Secure Access
+              </p>
+              <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-stone-900">
+                Sign in
+              </h2>
+            </div>
+            <div className="pill">{serverAwake ? "Server ready" : "Wake required"}</div>
           </div>
 
-        </div>
+          <div className="mt-8 space-y-5">
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-stone-700">
+                Email
+              </span>
+              <input
+                type="email"
+                placeholder="name@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-field"
+              />
+            </label>
 
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-stone-700">
+                Password
+              </span>
+              <input
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-field"
+              />
+            </label>
+
+            {!serverAwake && (
+              <button
+                onClick={wakeServer}
+                disabled={isWaking}
+                className="btn-secondary w-full"
+              >
+                {isWaking ? "Waking server..." : "Wake server once before login"}
+              </button>
+            )}
+
+            <button
+              onClick={handleLogin}
+              disabled={!serverAwake}
+              className="btn-primary w-full"
+            >
+              Enter dashboard
+            </button>
+          </div>
+
+          <div className="mt-8 rounded-[24px] border border-[rgba(83,61,39,0.1)] bg-[#f8f3eb] p-4 text-sm text-stone-600">
+            Render backend cold start ki wajah se pehle wake button tap karna
+            pad sakta hai. Ek baar ready ho jaye, login normal chalega.
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function FeatureBlock({ title, value }) {
+  return (
+    <div className="subtle-card">
+      <p className="text-sm font-semibold text-stone-500">{title}</p>
+      <p className="mt-3 text-lg font-bold tracking-tight text-stone-900">{value}</p>
+    </div>
+  );
+}
+
+function CredentialCard({ title, lines }) {
+  return (
+    <div className="subtle-card h-full">
+      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#8d591d]">
+        {title}
+      </p>
+      <div className="mt-3 space-y-2 text-sm leading-6 text-stone-600">
+        {lines.map((line) => (
+          <p key={line} className="break-words">
+            {line}
+          </p>
+        ))}
       </div>
     </div>
   );

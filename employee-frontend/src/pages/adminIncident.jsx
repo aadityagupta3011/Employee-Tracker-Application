@@ -1,185 +1,138 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import api from "../api/axios";
 import Navbar from "../components/Navbar";
-import { useQuery } from "@tanstack/react-query";
-export default function AdminIncidents() {
 
-  // const [incidents, setIncidents] = useState([]);
-  // const [users, setUsers] = useState([]);
-  // const [loading, setLoading] = useState(true);
+const formatDate = (date) => new Date(date).toLocaleDateString("en-IN");
+
+const formatTime = (date) =>
+  new Date(date).toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+const timeAgo = (date) => {
+  const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+  const intervals = [
+    { label: "year", seconds: 31536000 },
+    { label: "month", seconds: 2592000 },
+    { label: "day", seconds: 86400 },
+    { label: "hour", seconds: 3600 },
+    { label: "minute", seconds: 60 },
+  ];
+
+  for (const interval of intervals) {
+    const count = Math.floor(seconds / interval.seconds);
+    if (count > 0) {
+      return `${count} ${interval.label}${count > 1 ? "s" : ""} ago`;
+    }
+  }
+
+  return "Just now";
+};
+
+export default function AdminIncidents() {
   const [selectedImage, setSelectedImage] = useState(null);
 
-  useEffect(() => {
-    Promise.all([
-      api.get("/dashboard/admin/incidents"),
-      api.get("/dashboard/admin") // contains employee name + email
-    ])
-      .then(([incRes, userRes]) => {
-        setIncidents(incRes.data);
-        setUsers(userRes.data);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
   const { data: incidents = [], isLoading: incidentsLoading } = useQuery({
-  queryKey: ["incidents"],
-  queryFn: async () => {
-    const res = await api.get("/dashboard/admin/incidents");
-    return res.data;
-  },
-  staleTime: 1000 * 60 * 5,
-});
+    queryKey: ["incidents"],
+    queryFn: async () => {
+      const res = await api.get("/dashboard/admin/incidents");
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
-const { data: users = [], isLoading: usersLoading } = useQuery({
-  queryKey: ["adminEmployees"], // SAME key as other pages 🔥
-  queryFn: async () => {
-    const res = await api.get("/dashboard/admin");
-    return res.data;
-  },
-  staleTime: 1000 * 60 * 5,
-});
+  const { data: users = [], isLoading: usersLoading } = useQuery({
+    queryKey: ["adminEmployees"],
+    queryFn: async () => {
+      const res = await api.get("/dashboard/admin");
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
-  /* 🔍 FIND EMPLOYEE NAME FROM ID */
-  const getEmployee = (id) => {
-    return users.find(u => u.employeeId === id);
-  };
-
-  /* 🕒 FORMAT DATE */
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString("en-IN");
-  };
-
-  const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-  };
-
-  const timeAgo = (date) => {
-    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-
-    const intervals = [
-      { label: "year", seconds: 31536000 },
-      { label: "month", seconds: 2592000 },
-      { label: "day", seconds: 86400 },
-      { label: "hour", seconds: 3600 },
-      { label: "minute", seconds: 60 }
-    ];
-
-    for (let i of intervals) {
-      const count = Math.floor(seconds / i.seconds);
-      if (count > 0)
-        return `${count} ${i.label}${count > 1 ? "s" : ""} ago`;
-    }
-
-    return "Just now";
-  };
+  const getEmployee = (id) => users.find((user) => user.employeeId === id);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-
+    <div className="app-shell">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-
-        <h2 className="text-3xl font-bold mb-6 text-gray-800">
-          🚨 Incident Monitor
-        </h2>
+      <main className="page-wrap space-y-6">
+        <div className="page-header">
+          <div>
+            <span className="eyebrow">Incidents</span>
+            <h1 className="page-title mt-4">Incident review board</h1>
+            <p className="page-subtitle mt-3">
+              Browse captured incidents with employee details, image evidence,
+              and exact event timing.
+            </p>
+          </div>
+        </div>
 
         {incidentsLoading || usersLoading ? (
-          <p className="text-gray-500">Loading incidents...</p>
+          <div className="empty-state">Loading incidents...</div>
         ) : incidents.length === 0 ? (
-          <div className="text-center text-gray-400 mt-20">
-            No incidents detected 🎉
-          </div>
+          <div className="empty-state">No incidents detected.</div>
         ) : (
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {incidents.map((item) => {
-
               const employee = getEmployee(item.employeeId);
-
               return (
-                <div
-                  key={item._id}
-                  className="bg-white rounded-2xl shadow-sm border hover:shadow-lg transition p-4 flex flex-col"
-                >
-
-                  {/* 👤 HEADER */}
-                  <div className="flex items-center justify-between mb-3">
-
+                <article key={item._id} className="surface-card !p-4">
+                  <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
-
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
-                        {employee?.name?.charAt(0) || "?"}
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f7e3c4] text-sm font-bold text-[#8d591d]">
+                        {employee?.name?.charAt(0)?.toUpperCase() || "?"}
                       </div>
-
                       <div>
-                        <p className="font-semibold text-gray-800">
-                          {employee?.name || "Unknown Employee"}
+                        <p className="font-semibold text-stone-900">
+                          {employee?.name || "Unknown employee"}
                         </p>
-                        <p className="text-xs text-gray-500">
-                          {item.email}
-                        </p>
+                        <p className="text-xs text-stone-500">{item.email}</p>
                       </div>
-
                     </div>
-
-                    <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-600 font-medium">
-                      {item.reason.replace("_", " ")}
+                    <span className="rounded-full bg-[#fde2e2] px-3 py-1 text-xs font-semibold text-[#9f3d34]">
+                      {item.reason?.replaceAll("_", " ")}
                     </span>
-
                   </div>
 
-                  {/* 🖼 IMAGE */}
-                  <div
+                  <button
                     onClick={() => setSelectedImage(item.imageUrl)}
-                    className="cursor-pointer overflow-hidden rounded-xl"
+                    className="mt-4 block w-full overflow-hidden rounded-[22px]"
                   >
                     <img
                       src={item.imageUrl}
                       alt="incident"
-                      className="w-full h-52 object-cover hover:scale-105 transition"
+                      className="h-56 w-full object-cover transition duration-300 hover:scale-[1.03]"
                     />
-                  </div>
+                  </button>
 
-                  {/* 🕒 FOOTER */}
-                  <div className="mt-3 text-xs text-gray-500 space-y-1">
-
-                    <div className="flex justify-between">
+                  <div className="mt-4 rounded-[20px] bg-[#f8f3eb] p-4 text-sm text-stone-600">
+                    <div className="flex items-center justify-between gap-3">
                       <span>{formatDate(item.timestamp)}</span>
                       <span>{formatTime(item.timestamp)}</span>
                     </div>
-
-                    <p className="text-right text-gray-400">
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
                       {timeAgo(item.timestamp)}
                     </p>
-
                   </div>
-
-                </div>
+                </article>
               );
             })}
-
           </div>
         )}
-      </div>
+      </main>
 
-      {/* 🔍 IMAGE MODAL */}
       {selectedImage && (
-        <div
-          onClick={() => setSelectedImage(null)}
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-        >
+        <div className="modal-backdrop" onClick={() => setSelectedImage(null)}>
           <img
             src={selectedImage}
-            className="max-h-[90vh] rounded-xl shadow-2xl"
+            alt="incident preview"
+            className="max-h-[90vh] rounded-[28px] shadow-2xl"
           />
         </div>
       )}
-
     </div>
   );
 }

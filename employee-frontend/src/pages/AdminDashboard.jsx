@@ -1,36 +1,24 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Navbar from "../components/Navbar";
 import api from "../api/axios";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+const formatMinutes = (seconds = 0) => `${Math.floor(seconds / 60)} min`;
 
 export default function AdminDashboard() {
   const dropdownRef = useRef(null);
-
-  // const [employees, setEmployees] = useState([]);
-  // const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const [selected, setSelected] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
-
   const [searchTerm, setSearchTerm] = useState("");
-
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-
   const [empName, setEmpName] = useState("");
   const [empEmail, setEmpEmail] = useState("");
   const [empPassword, setEmpPassword] = useState("");
   const [empDept, setEmpDept] = useState("");
   const [creating, setCreating] = useState(false);
-
-  /* ================= FETCH EMPLOYEES ================= */
-  // useEffect(() => {
-  //   api
-  //     .get("/dashboard/admin")
-  //     .then((res) => setEmployees(res.data))
-  //     .finally(() => setLoading(false));
-  // }, []);
-  const queryClient = useQueryClient();
 
   const { data: employees = [], isLoading } = useQuery({
     queryKey: ["adminEmployees"],
@@ -40,7 +28,7 @@ export default function AdminDashboard() {
     },
     staleTime: 1000 * 60 * 5,
   });
-  /* ================= CLOSE DROPDOWN ================= */
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -52,24 +40,37 @@ export default function AdminDashboard() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /* ================= SORTING ================= */
-  const sortedByFocus = [...employees].sort(
-    (a, b) => (b.focusScore || 0) - (a.focusScore || 0),
+  const sortedByFocus = useMemo(
+    () => [...employees].sort((a, b) => (b.focusScore || 0) - (a.focusScore || 0)),
+    [employees],
   );
 
   const topFive = sortedByFocus.slice(0, 5);
   const lowFive = [...sortedByFocus].reverse().slice(0, 5);
+  const averageFocus = employees.length
+    ? Math.round(
+        employees.reduce((sum, emp) => sum + (emp.focusScore || 0), 0) / employees.length,
+      )
+    : 0;
+  const totalActiveHours = (
+    employees.reduce((sum, emp) => sum + (emp.activeSeconds || 0), 0) / 3600
+  ).toFixed(1);
 
-  /* ================= f ================= */
+  const filteredEmployees = employees.filter((emp) => {
+    const query = searchTerm.toLowerCase();
+    return (
+      emp.name?.toLowerCase().includes(query) || emp.email?.toLowerCase().includes(query)
+    );
+  });
+
   const sendMail = async () => {
     await api.post("/admin/send-mail", {
-      to: selected.map((e) => e.email),
+      to: selected.map((emp) => emp.email),
       subject,
       message,
     });
 
-    alert("Mail sent ✅");
-
+    alert("Mail sent.");
     setSelected([]);
     setSubject("");
     setMessage("");
@@ -77,12 +78,12 @@ export default function AdminDashboard() {
 
   const handleCreateEmployee = async () => {
     if (!empName || !empEmail || !empPassword || !empDept) {
-      return alert("All fields required");
+      alert("All fields are required.");
+      return;
     }
 
     try {
       setCreating(true);
-
       await api.post("/auth/register-employee", {
         name: empName,
         email: empEmail,
@@ -90,267 +91,296 @@ export default function AdminDashboard() {
         department: empDept,
       });
 
-      alert("Employee created ✅");
-
+      alert("Employee created.");
       setEmpName("");
       setEmpEmail("");
       setEmpPassword("");
       setEmpDept("");
-
-      // refresh leaderboard + dropdown
-      queryClient.invalidateQueries(["adminEmployees"]);
+      queryClient.invalidateQueries({ queryKey: ["adminEmployees"] });
     } catch (err) {
-      alert(err.response?.data?.message || "Creation failed ❌");
+      alert(err.response?.data?.message || "Creation failed.");
     } finally {
       setCreating(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="app-shell">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        <h2 className="text-3xl font-bold text-gray-800">
-          Analytics Dashboard 📊
-        </h2>
+      <main className="page-wrap space-y-8">
+        <div className="page-header">
+          <div>
+            <span className="eyebrow">Analytics</span>
+            <h1 className="page-title mt-4">Team performance at a glance</h1>
+            <p className="page-subtitle mt-3">
+              High performers, low engagement, quick communication, and employee
+              onboarding, all from one screen.
+            </p>
+          </div>
+        </div>
+
+        <section className="grid gap-4 md:grid-cols-3">
+          <MetricCard label="Employees tracked" value={employees.length} detail="Current roster" />
+          <MetricCard label="Average focus" value={`${averageFocus}%`} detail="Across all employees" />
+          <MetricCard label="Active hours logged" value={totalActiveHours} detail="Combined total" />
+        </section>
 
         {isLoading ? (
-          <p>Loading...</p>
+          <div className="empty-state">Loading dashboard data...</div>
         ) : (
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* LEFT SIDE — LEADERBOARDS */}
-            <div className="space-y-8">
-              {/* TOP */}
-              <Leaderboard
-                title="🏆 Top Performers"
-                data={topFive}
-                type="top"
-              />
-
-              {/* LOW */}
-              <Leaderboard
-                title="⚠ Needs Attention"
-                data={lowFive}
-                type="low"
-              />
+          <section className="dashboard-grid">
+            <div className="space-y-6 lg:col-span-5">
+              <Leaderboard title="Top performers" data={topFive} tone="positive" />
+              <Leaderboard title="Needs attention" data={lowFive} tone="alert" />
             </div>
-            <div className="space-y-8">
-              {/* RIGHT SIDE — QUICK MAIL */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border relative">
-                <h3 className="text-lg font-bold mb-4">✉️ Quick Mail</h3>
 
-                {/* TO FIELD */}
-                <div className="mb-3 relative" ref={dropdownRef}>
-                  <label className="text-sm text-gray-600">
-                    To {selected.length > 0 && `(${selected.length})`}
-                  </label>
-
-                  <div
-                    onClick={() => setShowDropdown(true)}
-                    className="border rounded-lg p-2 min-h-[42px] flex flex-wrap gap-2 cursor-text">
-                    {selected.map((emp) => (
-                      <span
-                        key={emp.employeeId}
-                        className="flex items-center gap-1 bg-indigo-100 px-2 py-1 rounded text-xs">
-                        {emp.name}
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelected((prev) =>
-                              prev.filter(
-                                (x) => x.employeeId !== emp.employeeId,
-                              ),
-                            );
-                          }}
-                          className="font-bold hover:text-red-500">
-                          ×
-                        </button>
-                      </span>
-                    ))}
+            <div className="space-y-6 lg:col-span-7">
+              <div className="surface-card relative">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <span className="eyebrow">Quick mail</span>
+                    <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-stone-900">
+                      Reach employees fast
+                    </h2>
                   </div>
-
-                  {showDropdown && (
-                    <div className="absolute z-50 bg-white border mt-1 rounded-lg w-full max-h-64 overflow-y-auto shadow">
-                      <div className="flex">
-                        <input
-                          placeholder="Search employee..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full p-2 border-b outline-none"
-                        />
-
-                        {/* SELECT ALL */}
-                        <div
-                          onClick={() => setSelected(employees)}
-                          className="p-2 text-sm font-medium text-indigo-600 cursor-pointer hover:bg-indigo-50 border-b">
-                          Select All
-                        </div>
-                      </div>
-
-                      {employees
-                        .filter(
-                          (emp) =>
-                            emp.name
-                              .toLowerCase()
-                              .includes(searchTerm.toLowerCase()) ||
-                            emp.email
-                              .toLowerCase()
-                              .includes(searchTerm.toLowerCase()),
-                        )
-                        .map((emp) => {
-                          const alreadySelected = selected.some(
-                            (e) => e.employeeId === emp.employeeId,
-                          );
-
-                          return (
-                            <div
-                              key={emp.employeeId}
-                              onClick={() => {
-                                if (!alreadySelected) {
-                                  setSelected((prev) => [...prev, emp]);
-                                }
-                              }}
-                              className={`p-2 text-sm cursor-pointer hover:bg-gray-100
-                            ${alreadySelected && "opacity-40 pointer-events-none"}`}>
-                              {emp.name} — {emp.email}
-                            </div>
-                          );
-                        })}
-                    </div>
-                  )}
+                  <span className="pill">{selected.length} selected</span>
                 </div>
 
-                <input
-                  placeholder="Subject"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  className="w-full border rounded-lg p-2 mb-3"
-                />
+                <div className="mt-6 space-y-4">
+                  <div className="relative" ref={dropdownRef}>
+                    <label className="mb-2 block text-sm font-semibold text-stone-700">
+                      Recipients
+                    </label>
+                    <div
+                      onClick={() => setShowDropdown(true)}
+                      className="input-field flex min-h-[56px] flex-wrap items-center gap-2 !py-2"
+                    >
+                      {selected.length === 0 && (
+                        <span className="text-sm text-stone-400">Choose one or more employees</span>
+                      )}
+                      {selected.map((emp) => (
+                        <span
+                          key={emp.employeeId}
+                          className="inline-flex items-center gap-2 rounded-full bg-[#f7e3c4] px-3 py-1.5 text-xs font-semibold text-[#8d591d]"
+                        >
+                          {emp.name}
+                          <button
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setSelected((prev) =>
+                                prev.filter((item) => item.employeeId !== emp.employeeId),
+                              );
+                            }}
+                          >
+                            x
+                          </button>
+                        </span>
+                      ))}
+                    </div>
 
-                <textarea
-                  rows="4"
-                  placeholder="Message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="w-full border rounded-lg p-2 mb-3"
-                />
+                    {showDropdown && (
+                      <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-[24px] border border-[rgba(83,61,39,0.12)] bg-white shadow-[0_20px_40px_rgba(44,32,20,0.12)]">
+                        <div className="flex flex-col gap-3 border-b border-[rgba(83,61,39,0.08)] p-3 sm:flex-row">
+                          <input
+                            placeholder="Search employee"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="input-field !py-2.5"
+                          />
+                          <button
+                            onClick={() => setSelected(employees)}
+                            className="btn-secondary shrink-0 !py-2.5"
+                          >
+                            Select all
+                          </button>
+                        </div>
 
-                <button
-                  onClick={sendMail}
-                  className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
-                  Send Mail
-                </button>
+                        <div className="max-h-64 overflow-y-auto p-2">
+                          {filteredEmployees.map((emp) => {
+                            const alreadySelected = selected.some(
+                              (item) => item.employeeId === emp.employeeId,
+                            );
+
+                            return (
+                              <button
+                                key={emp.employeeId}
+                                onClick={() => {
+                                  if (!alreadySelected) {
+                                    setSelected((prev) => [...prev, emp]);
+                                  }
+                                }}
+                                disabled={alreadySelected}
+                                className="flex w-full items-start justify-between rounded-2xl px-3 py-3 text-left transition hover:bg-[#f8f3eb] disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <span>
+                                  <span className="block text-sm font-semibold text-stone-800">
+                                    {emp.name}
+                                  </span>
+                                  <span className="block text-xs text-stone-500">{emp.email}</span>
+                                </span>
+                                <span className="text-xs font-semibold text-[#8d591d]">
+                                  {alreadySelected ? "Added" : "Add"}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-semibold text-stone-700">
+                      Subject
+                    </span>
+                    <input
+                      placeholder="Weekly follow-up"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      className="input-field"
+                    />
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-semibold text-stone-700">
+                      Message
+                    </span>
+                    <textarea
+                      rows="5"
+                      placeholder="Write a short update or feedback note"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      className="textarea-field"
+                    />
+                  </label>
+
+                  <button onClick={sendMail} className="btn-primary w-full">
+                    Send mail
+                  </button>
+                </div>
               </div>
-              {/* ================= CREATE EMPLOYEE ================= */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border">
-                <h3 className="text-lg font-bold mb-4">➕ Create Employee</h3>
 
-                <input
-                  placeholder="Full Name"
-                  value={empName}
-                  onChange={(e) => setEmpName(e.target.value)}
-                  className="w-full border rounded-lg p-2 mb-3"
-                />
+              <div className="surface-card">
+                <span className="eyebrow">New employee</span>
+                <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-stone-900">
+                  Add a new account
+                </h2>
 
-                <input
-                  placeholder="Email"
-                  value={empEmail}
-                  onChange={(e) => setEmpEmail(e.target.value)}
-                  className="w-full border rounded-lg p-2 mb-3"
-                />
-
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={empPassword}
-                  onChange={(e) => setEmpPassword(e.target.value)}
-                  className="w-full border rounded-lg p-2 mb-3"
-                />
-
-                <input
-                  placeholder="Department"
-                  value={empDept}
-                  onChange={(e) => setEmpDept(e.target.value)}
-                  className="w-full border rounded-lg p-2 mb-4"
-                />
+                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                  <input
+                    placeholder="Full name"
+                    value={empName}
+                    onChange={(e) => setEmpName(e.target.value)}
+                    className="input-field"
+                  />
+                  <input
+                    placeholder="Email address"
+                    value={empEmail}
+                    onChange={(e) => setEmpEmail(e.target.value)}
+                    className="input-field"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    value={empPassword}
+                    onChange={(e) => setEmpPassword(e.target.value)}
+                    className="input-field"
+                  />
+                  <input
+                    placeholder="Department"
+                    value={empDept}
+                    onChange={(e) => setEmpDept(e.target.value)}
+                    className="input-field"
+                  />
+                </div>
 
                 <button
                   onClick={handleCreateEmployee}
                   disabled={creating}
-                  className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
-                  {creating ? "Creating..." : "Create Employee"}
+                  className="btn-primary mt-5 w-full md:w-auto"
+                >
+                  {creating ? "Creating..." : "Create employee"}
                 </button>
               </div>
             </div>
-          </div>
+          </section>
         )}
-      </div>
+      </main>
     </div>
   );
 }
 
-/* ================= LEADERBOARD ================= */
-
-function Leaderboard({ title, data, type }) {
+function MetricCard({ label, value, detail }) {
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border">
-      <h3
-        className={`text-lg font-bold mb-4 ${type === "low" && "text-red-600"}`}>
-        {title}
-      </h3>
-
-      {data.length === 0 ? (
-        <p className="text-sm text-gray-400">No data available</p>
-      ) : (
-        data.map((emp, index) => (
-          <PerformerRow
-            key={emp.employeeId}
-            emp={emp}
-            rank={index + 1}
-            type={type}
-          />
-        ))
-      )}
+    <div className="metric-card">
+      <p className="text-sm font-semibold text-stone-500">{label}</p>
+      <div className="metric-value">{value}</div>
+      <p className="mt-2 text-sm text-stone-500">{detail}</p>
     </div>
   );
 }
 
-/* ================= ROW ================= */
-
-function PerformerRow({ emp, rank, type }) {
-  const isTop = type === "top";
+function Leaderboard({ title, data, tone }) {
+  const toneStyles =
+    tone === "alert"
+      ? {
+          badge: "bg-[#fde2e2] text-[#9f3d34]",
+          rank: "text-[#9f3d34]",
+          avatar: "bg-[#fde2e2] text-[#9f3d34]",
+          score: "text-[#9f3d34]",
+        }
+      : {
+          badge: "bg-[#f7e3c4] text-[#8d591d]",
+          rank: "text-[#8d591d]",
+          avatar: "bg-[#f7e3c4] text-[#8d591d]",
+          score: "text-[#1f3a33]",
+        };
 
   return (
-    <div className="flex items-center justify-between py-3 border-b last:border-none">
-      <div className="flex items-center gap-3">
-        <span
-          className={`font-bold ${isTop ? "text-indigo-600" : "text-red-500"}`}>
-          #{rank}
+    <div className="surface-card">
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-2xl font-extrabold tracking-tight text-stone-900">
+          {title}
+        </h2>
+        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${toneStyles.badge}`}>
+          {data.length} people
         </span>
-
-        <div
-          className={`w-9 h-9 rounded-full flex items-center justify-center font-bold
-        ${isTop ? "bg-indigo-100 text-indigo-600" : "bg-red-100 text-red-600"}`}>
-          {emp.name?.charAt(0)}
-        </div>
-
-        <div>
-          <p className="font-medium">{emp.name}</p>
-          <p className="text-xs text-gray-500">{emp.email}</p>
-        </div>
       </div>
 
-      <div className="text-right">
-        <p
-          className={`font-semibold ${isTop ? "text-green-600" : "text-red-600"}`}>
-          {emp.focusScore || 0}%
-        </p>
+      <div className="mt-5 space-y-3">
+        {data.length === 0 ? (
+          <p className="text-sm text-stone-500">No data available right now.</p>
+        ) : (
+          data.map((emp, index) => (
+            <div
+              key={emp.employeeId}
+              className="flex items-center justify-between gap-3 rounded-[22px] bg-white/70 p-4"
+            >
+              <div className="flex items-center gap-3">
+                <span className={`w-7 text-sm font-extrabold ${toneStyles.rank}`}>
+                  #{index + 1}
+                </span>
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold ${toneStyles.avatar}`}
+                >
+                  {emp.name?.charAt(0)?.toUpperCase() || "?"}
+                </div>
+                <div>
+                  <p className="font-semibold text-stone-900">{emp.name}</p>
+                  <p className="text-xs text-stone-500">{emp.email}</p>
+                </div>
+              </div>
 
-        <p className="text-xs text-gray-500">
-          {Math.floor((emp.activeSeconds || 0) / 60)} min active
-        </p>
+              <div className="text-right">
+                <p className={`text-lg font-extrabold ${toneStyles.score}`}>
+                  {emp.focusScore || 0}%
+                </p>
+                <p className="text-xs text-stone-500">{formatMinutes(emp.activeSeconds)}</p>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

@@ -1,93 +1,128 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
 import { Menu, X } from "lucide-react";
+
+const navItems = [
+  { path: "/", label: "Overview" },
+  { path: "/employees", label: "Employees" },
+  { path: "/dashboard", label: "Analytics" },
+  { path: "/indident", label: "Incidents" },
+  { path: "/profile", label: "Profile" },
+];
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
+  const adminName = localStorage.getItem("name") || "Admin";
+  const initials = useMemo(
+    () =>
+      adminName
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join("") || "A",
+    [adminName],
+  );
+
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
   };
 
-  const navLink = (path, label) => (
-    <Link
-      to={path}
-      onClick={() => setOpen(false)}
-      className={`px-3 py-2 rounded-lg transition-all duration-200 text-sm font-medium
-      ${
-        location.pathname === path
-          ? "bg-indigo-600 text-white"
-          : "text-gray-300 hover:text-white hover:bg-white/10"
-      }`}
-    >
-      {label}
-    </Link>
-  );
+  const navLinkClass = (path) =>
+    `rounded-full px-4 py-2 text-sm font-semibold transition ${
+      location.pathname === path
+        ? "bg-[#1f3a33] text-white shadow-[0_12px_24px_rgba(31,58,51,0.18)]"
+        : "text-stone-600 hover:bg-white/80 hover:text-stone-900"
+    }`;
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-lg bg-gray-900/80 border-b border-white/10">
-
-      <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-
-        {/* LOGO */}
-        <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">
-          WorkTrack Admin
-        </h1>
-
-        {/* DESKTOP MENU */}
-        <div className="hidden md:flex items-center gap-2">
-          {navLink("/", "Home")}
-          {navLink("/employees", "Employees")}
-          {navLink("/dashboard", "Dashboard")}
-          {navLink("/indident","Incidents")}
-          {navLink("/profile", "Profile")}
+    <nav className="sticky top-0 z-40 border-b border-[rgba(83,61,39,0.08)] bg-[rgba(248,243,235,0.78)] backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1f3a33] text-sm font-bold tracking-[0.2em] text-white">
+            WT
+          </div>
+          <div>
+            <p className="text-lg font-extrabold tracking-tight text-stone-900">
+              WorkTrack Admin
+            </p>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-500">
+              Operations Console
+            </p>
+          </div>
         </div>
 
-        {/* RIGHT SECTION */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden items-center gap-2 rounded-full border border-[rgba(83,61,39,0.08)] bg-white/70 p-1.5 lg:flex">
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={navLinkClass(item.path)}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
 
-          {/* AVATAR */}
-          <div className="w-9 h-9 flex items-center justify-center rounded-full bg-indigo-600 text-white font-semibold">
-            A
+        <div className="hidden items-center gap-3 lg:flex">
+          <div className="flex items-center gap-3 rounded-full border border-[rgba(83,61,39,0.1)] bg-white/80 px-3 py-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f7e3c4] text-sm font-bold text-[#8d591d]">
+              {initials}
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-semibold text-stone-800">{adminName}</p>
+              <p className="text-xs text-stone-500">Administrator</p>
+            </div>
           </div>
 
-          {/* LOGOUT */}
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 px-4 py-1.5 rounded-lg text-sm font-medium transition"
-          >
+          <button onClick={handleLogout} className="btn-secondary !rounded-full !px-4 !py-2.5">
             Logout
           </button>
         </div>
 
-        {/* MOBILE MENU BUTTON */}
         <button
-          onClick={() => setOpen(!open)}
-          className="md:hidden text-gray-300"
+          onClick={() => setOpen((value) => !value)}
+          className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[rgba(83,61,39,0.12)] bg-white/75 text-stone-700 lg:hidden"
+          aria-label="Toggle menu"
         >
-          {open ? <X size={26} /> : <Menu size={26} />}
+          {open ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
-      {/* MOBILE MENU */}
       {open && (
-        <div className="md:hidden px-6 pb-4 flex flex-col gap-2 bg-gray-900/95 backdrop-blur-lg">
+        <div className="border-t border-[rgba(83,61,39,0.08)] px-4 pb-4 lg:hidden sm:px-6">
+          <div className="surface-card mt-2 space-y-3 !rounded-[24px] !p-4">
+            <div className="flex items-center gap-3 rounded-2xl bg-[#f8f3eb] p-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f7e3c4] text-sm font-bold text-[#8d591d]">
+                {initials}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-stone-800">{adminName}</p>
+                <p className="text-xs text-stone-500">Administrator</p>
+              </div>
+            </div>
 
-          {navLink("/", "Home")}
-          {navLink("/employees", "Employees")}
-          {navLink("/dashboard", "Dashboard")}
-          {navLink("/profile", "Profile")}
+            <div className="flex flex-col gap-2">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setOpen(false)}
+                  className={navLinkClass(item.path)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
 
-          <button
-            onClick={handleLogout}
-            className="mt-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm font-medium transition"
-          >
-            Logout
-          </button>
-
+            <button onClick={handleLogout} className="btn-secondary w-full">
+              Logout
+            </button>
+          </div>
         </div>
       )}
     </nav>

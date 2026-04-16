@@ -2,6 +2,34 @@ import { useEffect, useState } from "react";
 import api from "../api/axios";
 import EmployeeNavbar from "../components/EmployeeNavbar";
 
+const formatDate = (date) => new Date(date).toLocaleDateString("en-IN");
+
+const formatTime = (date) =>
+  new Date(date).toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+const timeAgo = (date) => {
+  const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+  const intervals = [
+    { label: "year", seconds: 31536000 },
+    { label: "month", seconds: 2592000 },
+    { label: "day", seconds: 86400 },
+    { label: "hour", seconds: 3600 },
+    { label: "minute", seconds: 60 },
+  ];
+
+  for (const interval of intervals) {
+    const count = Math.floor(seconds / interval.seconds);
+    if (count > 0) {
+      return `${count} ${interval.label}${count > 1 ? "s" : ""} ago`;
+    }
+  }
+
+  return "Just now";
+};
+
 export default function EmployeeIncidents() {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,131 +42,72 @@ export default function EmployeeIncidents() {
       .finally(() => setLoading(false));
   }, []);
 
-  /* 🕒 FORMAT DATE */
-  const formatDate = (date) =>
-    new Date(date).toLocaleDateString("en-IN");
-
-  const formatTime = (date) =>
-    new Date(date).toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-  const timeAgo = (date) => {
-    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-
-    const intervals = [
-      { label: "year", seconds: 31536000 },
-      { label: "month", seconds: 2592000 },
-      { label: "day", seconds: 86400 },
-      { label: "hour", seconds: 3600 },
-      { label: "minute", seconds: 60 },
-    ];
-
-    for (let i of intervals) {
-      const count = Math.floor(seconds / i.seconds);
-      if (count > 0)
-        return `${count} ${i.label}${count > 1 ? "s" : ""} ago`;
-    }
-
-    return "Just now";
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="app-shell">
       <EmployeeNavbar />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-
-        <h2 className="text-3xl font-bold mb-6 text-gray-800">
-          ⚠ My Incidents
-        </h2>
+      <main className="page-wrap space-y-6">
+        <div className="page-header">
+          <div>
+            <span className="eyebrow">My Incidents</span>
+            <h1 className="page-title mt-4">Review flagged moments</h1>
+            <p className="page-subtitle mt-3">
+              Every incident includes the reason, image snapshot, and the exact
+              time it was captured.
+            </p>
+          </div>
+        </div>
 
         {loading ? (
-          <p className="text-gray-500">Loading incidents...</p>
+          <div className="empty-state">Loading incidents...</div>
         ) : incidents.length === 0 ? (
-          <div className="text-center text-gray-400 mt-20">
-            No incidents detected 🎉
-          </div>
+          <div className="empty-state">No incidents detected.</div>
         ) : (
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {incidents.map((item) => (
-              <div
-                key={item._id}
-                className="bg-white rounded-2xl shadow-sm border hover:shadow-lg transition p-4 flex flex-col"
-              >
-
-                {/* HEADER */}
-                <div className="flex items-center justify-between mb-3">
-
-                  <div className="flex items-center gap-3">
-
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
-                      {item.email?.charAt(0).toUpperCase()}
-                    </div>
-
-                    <div>
-                      <p className="font-semibold text-gray-800">
-                        {item.email}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Incident Detected
-                      </p>
-                    </div>
-
+              <article key={item._id} className="surface-card !p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-semibold text-stone-900">{item.email}</p>
+                    <p className="text-xs text-stone-500">Incident detected</p>
                   </div>
-
-                  <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-600 font-medium">
-                    {item.reason.replace("_", " ")}
+                  <span className="rounded-full bg-[#fde2e2] px-3 py-1 text-xs font-semibold text-[#9f3d34]">
+                    {item.reason?.replaceAll("_", " ")}
                   </span>
-
                 </div>
 
-                {/* IMAGE */}
-                <div
+                <button
                   onClick={() => setSelectedImage(item.imageUrl)}
-                  className="cursor-pointer overflow-hidden rounded-xl"
+                  className="mt-4 block w-full overflow-hidden rounded-[22px]"
                 >
                   <img
                     src={item.imageUrl}
                     alt="incident"
-                    className="w-full h-52 object-cover hover:scale-105 transition"
+                    className="h-56 w-full object-cover transition duration-300 hover:scale-[1.03]"
                   />
-                </div>
+                </button>
 
-                {/* FOOTER */}
-                <div className="mt-3 text-xs text-gray-500 space-y-1">
-
-                  <div className="flex justify-between">
+                <div className="mt-4 rounded-[20px] bg-[#f8f3eb] p-4 text-sm text-stone-600">
+                  <div className="flex items-center justify-between gap-3">
                     <span>{formatDate(item.timestamp)}</span>
                     <span>{formatTime(item.timestamp)}</span>
                   </div>
-
-                  <p className="text-right text-gray-400">
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
                     {timeAgo(item.timestamp)}
                   </p>
-
                 </div>
-
-              </div>
+              </article>
             ))}
-
           </div>
         )}
-      </div>
+      </main>
 
-      {/* IMAGE MODAL */}
       {selectedImage && (
-        <div
-          onClick={() => setSelectedImage(null)}
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-        >
+        <div className="modal-backdrop" onClick={() => setSelectedImage(null)}>
           <img
             src={selectedImage}
-            alt="preview"
-            className="max-h-[90vh] rounded-xl shadow-2xl"
+            alt="incident preview"
+            className="max-h-[90vh] rounded-[28px] shadow-2xl"
           />
         </div>
       )}

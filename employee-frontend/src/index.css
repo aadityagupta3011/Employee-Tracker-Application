@@ -1,4 +1,197 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
-.section-title {
-  @apply text-xl font-bold mb-3 text-gray-800;
+
+:root {
+  color-scheme: light;
+  --bg: #f4efe7;
+  --bg-strong: #efe6d9;
+  --panel: rgba(255, 255, 255, 0.78);
+  --panel-strong: rgba(255, 255, 255, 0.92);
+  --line: rgba(83, 61, 39, 0.12);
+  --text: #1f2937;
+  --muted: #6b7280;
+  --brand: #1f3a33;
+  --accent: #c57f32;
+  --accent-soft: #f7e3c4;
+  --danger-soft: #fde2e2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(197, 127, 50, 0.16), transparent 26rem),
+    radial-gradient(circle at top right, rgba(31, 58, 51, 0.14), transparent 22rem),
+    linear-gradient(180deg, #f8f3eb 0%, var(--bg) 52%, #f7f0e6 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  @apply min-h-screen;
+}
+
+.page-wrap {
+  @apply mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8;
+}
+
+.page-header {
+  @apply mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between;
+}
+
+.eyebrow {
+  @apply inline-flex w-fit items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em];
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.65);
+  color: #76522d;
+}
+
+.page-title {
+  @apply text-3xl font-extrabold tracking-tight sm:text-4xl;
+  color: #1d2b28;
+}
+
+.page-subtitle {
+  @apply max-w-2xl text-sm leading-6 sm:text-base;
+  color: var(--muted);
+}
+
+.surface-card {
+  @apply rounded-[28px] border p-5 shadow-[0_18px_45px_rgba(44,32,20,0.08)] backdrop-blur-xl sm:p-6;
+  border-color: var(--line);
+  background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+}
+
+.subtle-card {
+  @apply rounded-[24px] border p-4 shadow-[0_12px_30px_rgba(44,32,20,0.05)] sm:p-5;
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.dashboard-grid {
+  @apply grid gap-6 lg:grid-cols-12;
+}
+
+.input-field {
+  @apply w-full rounded-2xl border px-4 py-3 text-sm outline-none transition duration-200 placeholder:text-gray-400;
+  border-color: rgba(83, 61, 39, 0.14);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.input-field:focus,
+.textarea-field:focus {
+  border-color: rgba(197, 127, 50, 0.6);
+  box-shadow: 0 0 0 4px rgba(197, 127, 50, 0.14);
+}
+
+.textarea-field {
+  @apply w-full rounded-2xl border px-4 py-3 text-sm outline-none transition duration-200 placeholder:text-gray-400;
+  border-color: rgba(83, 61, 39, 0.14);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+  background: linear-gradient(135deg, #1f3a33, #31554a);
+  box-shadow: 0 14px 28px rgba(31, 58, 51, 0.2);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold transition duration-200;
+  border-color: rgba(83, 61, 39, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  color: #27433b;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.btn-danger {
+  @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition duration-200;
+  background: #8f3b33;
+  color: white;
+}
+
+.pill {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
+  background: var(--accent-soft);
+  color: #8d591d;
+}
+
+.table-shell {
+  @apply overflow-hidden rounded-[28px] border;
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 16px 40px rgba(44, 32, 20, 0.06);
+}
+
+.table-shell table {
+  @apply w-full border-collapse;
+}
+
+.table-shell thead {
+  background: rgba(244, 239, 231, 0.9);
+}
+
+.table-shell th {
+  @apply px-5 py-4 text-left text-xs font-bold uppercase tracking-[0.18em];
+  color: #7b6a58;
+}
+
+.table-shell td {
+  @apply px-5 py-4 align-middle text-sm;
+  border-top: 1px solid rgba(83, 61, 39, 0.08);
+}
+
+.modal-backdrop {
+  @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+  background: rgba(24, 22, 18, 0.48);
+  backdrop-filter: blur(10px);
+}
+
+.metric-card {
+  @apply rounded-[24px] border p-5;
+  border-color: rgba(83, 61, 39, 0.12);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.metric-value {
+  @apply mt-3 text-3xl font-extrabold tracking-tight;
+  color: #1d2b28;
+}
+
+.empty-state {
+  @apply rounded-[28px] border px-6 py-12 text-center;
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--muted);
 }

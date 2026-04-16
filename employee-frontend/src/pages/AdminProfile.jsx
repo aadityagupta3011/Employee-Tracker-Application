@@ -1,103 +1,96 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Navbar from "../components/Navbar";
 import api from "../api/axios";
-import { useQuery } from "@tanstack/react-query";
 
 export default function AdminProfile() {
-
-  // const [admin, setAdmin] = useState(null);
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-
-  // const [loading, setLoading] = useState(true);
-
-  /* ================= FETCH PROFILE ================= */
-  
   const { data: admin, isLoading } = useQuery({
-  queryKey: ["adminProfile"],
-  queryFn: async () => {
-    const res = await api.get("/auth/me");
-    return res.data;
-  },
-  staleTime: 1000 * 60 * 5,
-});
-useEffect(() => {
-  if (admin) {
-    setName(admin.name);
-    setEmail(admin.email);
-  }
-}, [admin]);
+    queryKey: ["adminProfile"],
+    queryFn: async () => {
+      const res = await api.get("/auth/me");
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
-  /* ================= UPDATE PROFILE ================= */
-  const handleUpdateProfile = async () => {
-    try {
-      await api.put("/auth/update-profile", { name, email });
-      alert("Profile updated ✅");
-    } catch {
-      alert("Update failed ❌");
+  useEffect(() => {
+    if (admin) {
+      setName(admin.name);
+      setEmail(admin.email);
+      localStorage.setItem("name", admin.name);
     }
-  }; 
+  }, [admin]);
 
-  if (isLoading) return <p className="p-8">Loading profile...</p>;
+  if (isLoading) {
+    return (
+      <div className="app-shell">
+        <Navbar />
+        <main className="page-wrap">
+          <div className="empty-state">Loading profile...</div>
+        </main>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-
+    <div className="app-shell">
       <Navbar />
 
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
-
-        <h2 className="text-3xl font-bold text-gray-800">
-          Profile Settings ⚙
-        </h2>
-
-        {/* ================= BASIC INFO ================= */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
-
-          <h3 className="text-lg font-semibold">👤 Basic Information</h3>
-
+      <main className="page-wrap space-y-6">
+        <div className="page-header">
           <div>
-            <label className="text-sm text-gray-500">Name</label>
-            <input
-              value={name} 
-              disabled
-              className="w-full border rounded-lg p-2 mt-1"
-            />
+            <span className="eyebrow">Profile</span>
+            <h1 className="page-title mt-4">Administrator details</h1>
+            <p className="page-subtitle mt-3">
+              A clean read-only view of your account information for this panel.
+            </p>
           </div>
-
-          <div>
-            <label className="text-sm text-gray-500">Email</label>
-            <input
-              value={email} 
-              disabled
-              className="w-full border rounded-lg p-2 mt-1"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-500">Role</label>
-            <input
-              value={admin.role}
-              disabled
-              className="w-full border rounded-lg p-2 mt-1 bg-gray-100"
-            />
-          </div>
-
-          <button 
-            className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700"
-          >
-            Save Changes
-          </button>
-
         </div>
- 
-      </div>
 
+        <section className="surface-card grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+          <div className="rounded-[24px] bg-[#1f3a33] p-6 text-white">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 text-2xl font-bold">
+              {name?.charAt(0)?.toUpperCase() || "A"}
+            </div>
+            <h2 className="mt-5 text-2xl font-extrabold tracking-tight">{name}</h2>
+            <p className="mt-2 text-sm text-stone-200">{email}</p>
+            <div className="mt-8 space-y-3 text-sm text-stone-200">
+              <p>Role: {admin.role}</p>
+              <p>Employee ID: {admin.employeeId || "Not assigned"}</p>
+              <p>
+                Joined:{" "}
+                {admin.createdAt
+                  ? new Date(admin.createdAt).toLocaleDateString("en-IN")
+                  : "N/A"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <ProfileField label="Name" value={name} onChange={setName} />
+            <ProfileField label="Email" value={email} onChange={setEmail} />
+            <ProfileField label="Role" value={admin.role} disabled />
+            <ProfileField label="Employee ID" value={admin.employeeId || "N/A"} disabled />
+          </div>
+        </section>
+      </main>
     </div>
+  );
+}
+
+function ProfileField({ label, value, onChange, disabled = true }) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-sm font-semibold text-stone-700">{label}</span>
+      <input
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange?.(e.target.value)}
+        className="input-field disabled:cursor-not-allowed disabled:bg-[#f5f0e8] disabled:text-stone-600"
+      />
+    </label>
   );
 }

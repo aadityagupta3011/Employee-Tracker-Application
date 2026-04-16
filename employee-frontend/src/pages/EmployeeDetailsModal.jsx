@@ -1,14 +1,18 @@
+import { useEffect, useMemo, useState } from "react";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, CartesianGrid, Cell
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Cell,
 } from "recharts";
-import { useEffect, useState } from "react";
 import api from "../api/axios";
 
 export default function EmployeeDetailsModal({ employee, onClose }) {
-
   const [chartData, setChartData] = useState([]);
-  const [stats, setStats] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -19,25 +23,18 @@ export default function EmployeeDetailsModal({ employee, onClose }) {
     const fetchData = async () => {
       try {
         const res = await api.get(
-          `/dashboard/admin/employee/${employee.employeeId}/app-usage`
+          `/dashboard/admin/employee/${employee.employeeId}/app-usage`,
         );
 
-        const usage = res.data.appUsage;
-
+        const usage = res.data.appUsage || {};
         const formatted = Object.entries(usage)
           .map(([app, seconds]) => ({
-            name: app.replace("_exe", "").slice(0, 12), // shorter for mobile
-            minutes: +(seconds / 60).toFixed(2)
+            name: app.replace("_exe", "").slice(0, 12),
+            minutes: Number((seconds / 60).toFixed(2)),
           }))
           .sort((a, b) => b.minutes - a.minutes);
 
         setChartData(formatted);
-
-        setStats({
-          active: Math.floor(employee.activeSeconds / 60),
-          idle: Math.floor(employee.idleSeconds / 60),
-        });
-
       } catch (err) {
         console.error(err);
       }
@@ -46,85 +43,69 @@ export default function EmployeeDetailsModal({ employee, onClose }) {
     fetchData();
   }, [employee]);
 
-  const totalMinutes = chartData.reduce((sum, app) => sum + app.minutes, 0);
+  const totalMinutes = useMemo(
+    () => chartData.reduce((sum, app) => sum + app.minutes, 0),
+    [chartData],
+  );
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex md:items-center md:justify-center">
-
-      {/* MODAL */}
-      <div className="bg-white w-full h-full md:h-auto md:max-w-5xl md:rounded-3xl p-5 md:p-8 overflow-y-auto">
-
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
-
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600 font-bold">
-              {employee.name?.charAt(0)}
+    <div className="modal-backdrop">
+      <div className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[32px] border border-[rgba(83,61,39,0.08)] bg-[#fbf7f0] p-5 shadow-2xl sm:p-7">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#f7e3c4] text-xl font-bold text-[#8d591d]">
+              {employee.name?.charAt(0)?.toUpperCase() || "?"}
             </div>
-
             <div>
-              <h2 className="text-lg md:text-2xl font-bold">
+              <h2 className="text-2xl font-extrabold tracking-tight text-stone-900">
                 {employee.name}
               </h2>
-              <p className="text-sm text-gray-500">{employee.email}</p>
+              <p className="text-sm text-stone-500">{employee.email}</p>
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="self-end md:self-auto text-sm bg-red-100 text-red-600 px-4 py-1.5 rounded-lg"
-          >
+          <button onClick={onClose} className="btn-secondary self-end sm:self-auto">
             Close
           </button>
-
         </div>
 
-        {/* STATS */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
-          <StatCard title="Active" value={formatMinutes(stats?.active)} />
-          <StatCard title="Idle" value={formatMinutes(stats?.idle)} />
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <StatCard
+            title="Active"
+            value={formatMinutes(Math.floor((employee.activeSeconds || 0) / 60))}
+          />
+          <StatCard
+            title="Idle"
+            value={formatMinutes(Math.floor((employee.idleSeconds || 0) / 60))}
+          />
           <StatCard title="Total" value={formatMinutes(totalMinutes)} />
         </div>
 
-        {/* CHART */}
-        <div className="w-full h-[320px] md:h-[420px]">
-
+        <div className="mt-8 h-[320px] w-full rounded-[28px] bg-white/75 p-4 sm:h-[420px] sm:p-6">
           <ResponsiveContainer>
-            <BarChart
-              data={chartData}
-              barSize={isMobile ? 22 : 42}
-            >
-
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-
+            <BarChart data={chartData} barSize={isMobile ? 22 : 40}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#dbcdb9" />
               <XAxis
                 dataKey="name"
-                angle={isMobile ? 0 : -18}
+                angle={isMobile ? 0 : -16}
                 textAnchor={isMobile ? "middle" : "end"}
-                tick={{ fontSize: isMobile ? 10 : 12 }}
+                tick={{ fontSize: isMobile ? 10 : 12, fill: "#6b7280" }}
               />
-
-              <YAxis hide={isMobile} />
-
+              <YAxis hide={isMobile} tick={{ fill: "#6b7280", fontSize: 12 }} />
               <Tooltip />
-
               <Bar dataKey="minutes" radius={[10, 10, 0, 0]}>
                 {chartData.map((entry, index) => (
-                  <Cell key={index} fill={getBarColor(entry.name)} />
+                  <Cell key={`${entry.name}-${index}`} fill={getBarColor(entry.name)} />
                 ))}
               </Bar>
-
             </BarChart>
           </ResponsiveContainer>
-
         </div>
-
       </div>
     </div>
   );
 }
 
-/* TIME FORMAT */
 const formatMinutes = (mins) => {
   if (!mins) return "0m";
   const h = Math.floor(mins / 60);
@@ -134,21 +115,17 @@ const formatMinutes = (mins) => {
   return `${h}h ${m}m`;
 };
 
-/* COLORS */
 const getBarColor = (name) => {
-  if (name.includes("productive")) return "#22c55e";
-  if (name.includes("distracting")) return "#ef4444";
-  return "#6366f1";
+  if (name.includes("productive")) return "#2d6a4f";
+  if (name.includes("distracting")) return "#b45146";
+  return "#1f3a33";
 };
 
-/* STAT CARD */
 function StatCard({ title, value }) {
   return (
-    <div className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 
-                    border border-gray-100 p-4 rounded-xl text-center">
-
-      <p className="text-xs text-gray-500">{title}</p>
-      <h3 className="text-lg md:text-xl font-bold">{value}</h3>
+    <div className="metric-card text-center">
+      <p className="text-sm font-semibold text-stone-500">{title}</p>
+      <div className="metric-value !mt-2 !text-2xl">{value}</div>
     </div>
   );
 }
