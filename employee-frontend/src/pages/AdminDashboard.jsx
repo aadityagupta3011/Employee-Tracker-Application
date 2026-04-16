@@ -154,7 +154,7 @@ export default function AdminDashboard() {
                     </label>
                     <div
                       onClick={() => setShowDropdown(true)}
-                      className="input-field flex min-h-[56px] flex-wrap items-center gap-2 !py-2"
+                      className="input-field flex min-h-[56px] cursor-pointer flex-wrap items-center gap-2 !py-2"
                     >
                       {selected.length === 0 && (
                         <span className="text-sm text-stone-400">Choose one or more employees</span>

@@ -44,7 +44,7 @@ export default function EmployeeDetailsModal({ employee, onClose }) {
   }, [employee]);
 
   const totalMinutes = useMemo(
-    () => chartData.reduce((sum, app) => sum + app.minutes, 0),
+    () => Math.round(chartData.reduce((sum, app) => sum + app.minutes, 0)),
     [chartData],
   );
 

@@ -35,7 +35,7 @@ export default function Navbar() {
   const navLinkClass = (path) =>
     `rounded-full px-4 py-2 text-sm font-semibold transition break-words ${
       location.pathname === path
-        ? "border border-[rgba(83,61,39,0.12)] bg-white text-stone-900 shadow-sm"
+        ? "bg-[#1f3a33] text-white shadow-sm"
         : "text-stone-600 hover:bg-[#1f3a33] hover:text-white"
     }`;
 

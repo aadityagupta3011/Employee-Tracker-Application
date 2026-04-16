@@ -103,7 +103,7 @@ export default function EmployeeIncidents() {
       </main>
 
       {selectedImage && (
-        <div className="modal-backdrop" onClick={() => setSelectedImage(null)}>
+        <div className="modal-backdrop cursor-pointer" onClick={() => setSelectedImage(null)}>
           <img
             src={selectedImage}
             alt="incident preview"
