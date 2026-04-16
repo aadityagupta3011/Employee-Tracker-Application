@@ -125,7 +125,7 @@ const { data: employees = [], isLoading } = useQuery({
 
             <tbody>
 
-              {loading ? (
+              {isLoading ? (
                 <tr>
                   <td colSpan="5" className="p-6 text-center text-gray-400">
                     Loading employees...
