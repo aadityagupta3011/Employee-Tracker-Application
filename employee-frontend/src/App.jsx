@@ -1,100 +1,12 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import Login from "./pages/Login.jsx";
-import Navbar from "./components/Navbar.jsx";
-import AdminHome from "./pages/AdminHome.jsx";
-import AdminEmployees from "./pages/AdminEmployees.jsx";
-import AdminDashboard from "./pages/AdminDashboard.jsx";
-import AdminProfile from "./pages/AdminProfile.jsx";
-import AdminIncidents from "./pages/adminIncident.jsx";
-import EmployeeNavbar from "./components/EmployeeNavbar.jsx";
-import EmployeeDashboard from "./pages/employeeDashboard.jsx";
-import EmployeeProfile from "./pages/EmployeeProfile.jsx";
-import EmployeeIncidents from "./pages/EmployeeIncidents.jsx";
+import { BrowserRouter } from "react-router-dom";
+import AppRouter from "./router/AppRouter";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminHome />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/employees"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminEmployees />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminProfile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/indident"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminIncidents />
-            </ProtectedRoute>
-          }
-        />
-<Route
-  path="/employee-dashboard"
-  element={
-    <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-      <>
-        <EmployeeDashboard />
-      </>
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/employee-profile"
-  element={
-    <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-      <> 
-        <EmployeeProfile />
-      </>
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/employee-incidents"
-  element={
-    <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-      <> 
-        <EmployeeIncidents />
-      </>
-    </ProtectedRoute>
-  }
-/>
-      </Routes>
-    </Router>
+    <BrowserRouter>
+      <AppRouter />
+    </BrowserRouter>
   );
 }
 
