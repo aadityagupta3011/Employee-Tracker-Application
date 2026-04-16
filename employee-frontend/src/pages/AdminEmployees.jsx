@@ -2,22 +2,28 @@ import { useEffect, useState } from "react";
 import api from "../api/axios";
 import EmployeeDetailsModal from "./EmployeeDetailsModal.jsx";
 import Navbar from "../components/Navbar.jsx";
+import { useQuery } from "@tanstack/react-query";
 
 export default function AdminEmployees() {
 
-  const [employees, setEmployees] = useState([]);
+  // const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
+
 
   const [sortBy, setSortBy] = useState("focus");
   const [sortOrder, setSortOrder] = useState("desc");
 
-  useEffect(() => {
-    api.get("/dashboard/admin")
-      .then(res => setEmployees(res.data))
-      .finally(() => setLoading(false));
-  }, []);
+
+const { data: employees = [], isLoading } = useQuery({
+  queryKey: ["adminEmployees"],
+  queryFn: async () => {
+    const res = await api.get("/dashboard/admin");
+    return res.data;
+  },
+  staleTime: 1000 * 60 * 5,
+});
 
   const formatMinutes = (mins) => {
     const h = Math.floor(mins / 60);
