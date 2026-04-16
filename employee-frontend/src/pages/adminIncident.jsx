@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import Navbar from "../components/Navbar";
-
+import { useQuery } from "@tanstack/react-query";
 export default function AdminIncidents() {
 
-  const [incidents, setIncidents] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [incidents, setIncidents] = useState([]);
+  // const [users, setUsers] = useState([]);
+  // const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
@@ -20,6 +20,24 @@ export default function AdminIncidents() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const { data: incidents = [], isLoading: incidentsLoading } = useQuery({
+  queryKey: ["incidents"],
+  queryFn: async () => {
+    const res = await api.get("/dashboard/admin/incidents");
+    return res.data;
+  },
+  staleTime: 1000 * 60 * 5,
+});
+
+const { data: users = [], isLoading: usersLoading } = useQuery({
+  queryKey: ["adminEmployees"], // SAME key as other pages 🔥
+  queryFn: async () => {
+    const res = await api.get("/dashboard/admin");
+    return res.data;
+  },
+  staleTime: 1000 * 60 * 5,
+});
 
   /* 🔍 FIND EMPLOYEE NAME FROM ID */
   const getEmployee = (id) => {
@@ -69,7 +87,7 @@ export default function AdminIncidents() {
           🚨 Incident Monitor
         </h2>
 
-        {loading ? (
+        {incidentsLoading || usersLoading ? (
           <p className="text-gray-500">Loading incidents...</p>
         ) : incidents.length === 0 ? (
           <div className="text-center text-gray-400 mt-20">

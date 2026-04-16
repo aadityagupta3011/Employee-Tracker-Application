@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import Navbar from "../components/Navbar";
 import api from "../api/axios";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function AdminDashboard() {
   const dropdownRef = useRef(null);
 
-  const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [employees, setEmployees] = useState([]);
+  // const [loading, setLoading] = useState(true);
 
   const [selected, setSelected] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -17,19 +18,28 @@ export default function AdminDashboard() {
   const [message, setMessage] = useState("");
 
   const [empName, setEmpName] = useState("");
-const [empEmail, setEmpEmail] = useState("");
-const [empPassword, setEmpPassword] = useState("");
-const [empDept, setEmpDept] = useState("");
-const [creating, setCreating] = useState(false);
+  const [empEmail, setEmpEmail] = useState("");
+  const [empPassword, setEmpPassword] = useState("");
+  const [empDept, setEmpDept] = useState("");
+  const [creating, setCreating] = useState(false);
 
   /* ================= FETCH EMPLOYEES ================= */
-  useEffect(() => {
-    api
-      .get("/dashboard/admin")
-      .then((res) => setEmployees(res.data))
-      .finally(() => setLoading(false));
-  }, []);
+  // useEffect(() => {
+  //   api
+  //     .get("/dashboard/admin")
+  //     .then((res) => setEmployees(res.data))
+  //     .finally(() => setLoading(false));
+  // }, []);
+  const queryClient = useQueryClient();
 
+  const { data: employees = [], isLoading } = useQuery({
+    queryKey: ["adminEmployees"],
+    queryFn: async () => {
+      const res = await api.get("/dashboard/admin");
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
   /* ================= CLOSE DROPDOWN ================= */
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -66,37 +76,35 @@ const [creating, setCreating] = useState(false);
   };
 
   const handleCreateEmployee = async () => {
-  if (!empName || !empEmail || !empPassword || !empDept) {
-    return alert("All fields required");
-  }
+    if (!empName || !empEmail || !empPassword || !empDept) {
+      return alert("All fields required");
+    }
 
-  try {
-    setCreating(true);
+    try {
+      setCreating(true);
 
-    await api.post("/auth/register-employee", {
-      name: empName,
-      email: empEmail,
-      password: empPassword,
-      department: empDept,
-    });
+      await api.post("/auth/register-employee", {
+        name: empName,
+        email: empEmail,
+        password: empPassword,
+        department: empDept,
+      });
 
-    alert("Employee created ✅");
+      alert("Employee created ✅");
 
-    setEmpName("");
-    setEmpEmail("");
-    setEmpPassword("");
-    setEmpDept("");
+      setEmpName("");
+      setEmpEmail("");
+      setEmpPassword("");
+      setEmpDept("");
 
-    // refresh leaderboard + dropdown
-    const res = await api.get("/dashboard/admin");
-    setEmployees(res.data);
-
-  } catch (err) {
-    alert(err.response?.data?.message || "Creation failed ❌");
-  } finally {
-    setCreating(false);
-  }
-};
+      // refresh leaderboard + dropdown
+      queryClient.invalidateQueries(["adminEmployees"]);
+    } catch (err) {
+      alert(err.response?.data?.message || "Creation failed ❌");
+    } finally {
+      setCreating(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -107,7 +115,7 @@ const [creating, setCreating] = useState(false);
           Analytics Dashboard 📊
         </h2>
 
-        {loading ? (
+        {isLoading ? (
           <p>Loading...</p>
         ) : (
           <div className="grid lg:grid-cols-2 gap-8">
@@ -127,157 +135,156 @@ const [creating, setCreating] = useState(false);
                 type="low"
               />
             </div>
-<div className="space-y-8">
-            {/* RIGHT SIDE — QUICK MAIL */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border relative">
-              <h3 className="text-lg font-bold mb-4">✉️ Quick Mail</h3>
+            <div className="space-y-8">
+              {/* RIGHT SIDE — QUICK MAIL */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border relative">
+                <h3 className="text-lg font-bold mb-4">✉️ Quick Mail</h3>
 
-              {/* TO FIELD */}
-              <div className="mb-3 relative" ref={dropdownRef}>
-                <label className="text-sm text-gray-600">
-                  To {selected.length > 0 && `(${selected.length})`}
-                </label>
+                {/* TO FIELD */}
+                <div className="mb-3 relative" ref={dropdownRef}>
+                  <label className="text-sm text-gray-600">
+                    To {selected.length > 0 && `(${selected.length})`}
+                  </label>
 
-                <div
-                  onClick={() => setShowDropdown(true)}
-                  className="border rounded-lg p-2 min-h-[42px] flex flex-wrap gap-2 cursor-text">
-                  {selected.map((emp) => (
-                    <span
-                      key={emp.employeeId}
-                      className="flex items-center gap-1 bg-indigo-100 px-2 py-1 rounded text-xs">
-                      {emp.name}
+                  <div
+                    onClick={() => setShowDropdown(true)}
+                    className="border rounded-lg p-2 min-h-[42px] flex flex-wrap gap-2 cursor-text">
+                    {selected.map((emp) => (
+                      <span
+                        key={emp.employeeId}
+                        className="flex items-center gap-1 bg-indigo-100 px-2 py-1 rounded text-xs">
+                        {emp.name}
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelected((prev) =>
-                            prev.filter((x) => x.employeeId !== emp.employeeId),
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelected((prev) =>
+                              prev.filter(
+                                (x) => x.employeeId !== emp.employeeId,
+                              ),
+                            );
+                          }}
+                          className="font-bold hover:text-red-500">
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+
+                  {showDropdown && (
+                    <div className="absolute z-50 bg-white border mt-1 rounded-lg w-full max-h-64 overflow-y-auto shadow">
+                      <div className="flex">
+                        <input
+                          placeholder="Search employee..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full p-2 border-b outline-none"
+                        />
+
+                        {/* SELECT ALL */}
+                        <div
+                          onClick={() => setSelected(employees)}
+                          className="p-2 text-sm font-medium text-indigo-600 cursor-pointer hover:bg-indigo-50 border-b">
+                          Select All
+                        </div>
+                      </div>
+
+                      {employees
+                        .filter(
+                          (emp) =>
+                            emp.name
+                              .toLowerCase()
+                              .includes(searchTerm.toLowerCase()) ||
+                            emp.email
+                              .toLowerCase()
+                              .includes(searchTerm.toLowerCase()),
+                        )
+                        .map((emp) => {
+                          const alreadySelected = selected.some(
+                            (e) => e.employeeId === emp.employeeId,
                           );
-                        }}
-                        className="font-bold hover:text-red-500">
-                        ×
-                      </button>
-                    </span>
-                  ))}
+
+                          return (
+                            <div
+                              key={emp.employeeId}
+                              onClick={() => {
+                                if (!alreadySelected) {
+                                  setSelected((prev) => [...prev, emp]);
+                                }
+                              }}
+                              className={`p-2 text-sm cursor-pointer hover:bg-gray-100
+                            ${alreadySelected && "opacity-40 pointer-events-none"}`}>
+                              {emp.name} — {emp.email}
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
                 </div>
 
-                {showDropdown && (
-                  <div className="absolute z-50 bg-white border mt-1 rounded-lg w-full max-h-64 overflow-y-auto shadow">
-                    <div className="flex">
-                      <input
-                        placeholder="Search employee..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full p-2 border-b outline-none"
-                      />
+                <input
+                  placeholder="Subject"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full border rounded-lg p-2 mb-3"
+                />
 
-                      {/* SELECT ALL */}
-                      <div
-                        onClick={() => setSelected(employees)}
-                        className="p-2 text-sm font-medium text-indigo-600 cursor-pointer hover:bg-indigo-50 border-b">
-                        Select All
-                      </div>
-                    </div>
+                <textarea
+                  rows="4"
+                  placeholder="Message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full border rounded-lg p-2 mb-3"
+                />
 
-                    {employees
-                      .filter(
-                        (emp) =>
-                          emp.name
-                            .toLowerCase()
-                            .includes(searchTerm.toLowerCase()) ||
-                          emp.email
-                            .toLowerCase()
-                            .includes(searchTerm.toLowerCase()),
-                      )
-                      .map((emp) => {
-                        const alreadySelected = selected.some(
-                          (e) => e.employeeId === emp.employeeId,
-                        );
-
-                        return (
-                          <div
-                            key={emp.employeeId}
-                            onClick={() => {
-                              if (!alreadySelected) {
-                                setSelected((prev) => [...prev, emp]);
-                              }
-                            }}
-                            className={`p-2 text-sm cursor-pointer hover:bg-gray-100
-                            ${alreadySelected && "opacity-40 pointer-events-none"}`}>
-                            {emp.name} — {emp.email}
-                          </div>
-                        );
-                      })}
-                  </div>
-                )}
+                <button
+                  onClick={sendMail}
+                  className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
+                  Send Mail
+                </button>
               </div>
+              {/* ================= CREATE EMPLOYEE ================= */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border">
+                <h3 className="text-lg font-bold mb-4">➕ Create Employee</h3>
 
-              <input
-                placeholder="Subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="w-full border rounded-lg p-2 mb-3"
-              />
+                <input
+                  placeholder="Full Name"
+                  value={empName}
+                  onChange={(e) => setEmpName(e.target.value)}
+                  className="w-full border rounded-lg p-2 mb-3"
+                />
 
-              <textarea
-                rows="4"
-                placeholder="Message"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="w-full border rounded-lg p-2 mb-3"
-              />
+                <input
+                  placeholder="Email"
+                  value={empEmail}
+                  onChange={(e) => setEmpEmail(e.target.value)}
+                  className="w-full border rounded-lg p-2 mb-3"
+                />
 
-              <button
-                onClick={sendMail}
-                className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
-                Send Mail
-              </button>
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={empPassword}
+                  onChange={(e) => setEmpPassword(e.target.value)}
+                  className="w-full border rounded-lg p-2 mb-3"
+                />
+
+                <input
+                  placeholder="Department"
+                  value={empDept}
+                  onChange={(e) => setEmpDept(e.target.value)}
+                  className="w-full border rounded-lg p-2 mb-4"
+                />
+
+                <button
+                  onClick={handleCreateEmployee}
+                  disabled={creating}
+                  className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
+                  {creating ? "Creating..." : "Create Employee"}
+                </button>
+              </div>
             </div>
-            {/* ================= CREATE EMPLOYEE ================= */}
-<div className="bg-white p-6 rounded-2xl shadow-sm border">
-  <h3 className="text-lg font-bold mb-4">➕ Create Employee</h3>
-
-  <input
-    placeholder="Full Name"
-    value={empName}
-    onChange={(e) => setEmpName(e.target.value)}
-    className="w-full border rounded-lg p-2 mb-3"
-  />
-
-  <input
-    placeholder="Email"
-    value={empEmail}
-    onChange={(e) => setEmpEmail(e.target.value)}
-    className="w-full border rounded-lg p-2 mb-3"
-  />
-
-  <input
-    type="password"
-    placeholder="Password"
-    value={empPassword}
-    onChange={(e) => setEmpPassword(e.target.value)}
-    className="w-full border rounded-lg p-2 mb-3"
-  />
-
-  <input
-    placeholder="Department"
-    value={empDept}
-    onChange={(e) => setEmpDept(e.target.value)}
-    className="w-full border rounded-lg p-2 mb-4"
-  />
-
-  <button
-    onClick={handleCreateEmployee}
-    disabled={creating}
-    className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
-  >
-    {creating ? "Creating..." : "Create Employee"}
-  </button>
-</div>
-
-</div>
-            </div>
-            
+          </div>
         )}
       </div>
     </div>
